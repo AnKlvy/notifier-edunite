@@ -6,10 +6,20 @@ option go_package = "github.com/AnKlvy/notify-service/protobuf/gen_notifier";
 
 // Сообщение для отправки уведомлений
 message Notification {
-  string user_id = 1;             // ID пользователя
-  string channel = 2;             // Канал (email, fcm, telegram)
-  string message = 3;             // Сообщение
-  string subject = 4;             // Тема уведомления для email
+  string message = 1;                           // Сообщение
+  string subject = 2;                           //Тема
+  map<string, string> metadata = 3;
+
+}
+
+message UserNotification {
+  string user_id = 1;                           // ID пользователя
+  Notification notification = 2;
+}
+
+message UserNotificationListResponse {
+  string user_id = 1;                           // ID пользователя
+  repeated Notification notification = 2;
 }
 
 // Запрос на подписку пользователя на канал уведомлений
@@ -17,7 +27,7 @@ message SubscribeRequest {
   string user_id = 1;             // ID пользователя
   string channel = 2;             // Канал (email, fcm, telegram)
   string value = 3;               // Токен или email
-  string metadata = 4;            // Метаданные (например, устройство или статус)
+  map<string, string> metadata = 4;            // Метаданные (например, устройство или статус)
 }
 
 // Запрос на отписку пользователя от канала
@@ -26,48 +36,32 @@ message UnsubscribeRequest {
   string channel = 2;             // Канал
 }
 
-// Запрос на отправку уведомления
-message SendNotificationRequest {
-  string user_id = 1;             // ID пользователя
-  string message = 2;             // Сообщение
-  string channel = 3;             // Канал (email, fcm, telegram)
-}
-
 // Ответ на запрос отправки уведомления
-message SendNotificationResponse {
+message SuccessResponse {
   bool success = 1;               // Успешно ли отправлено
   string error_message = 2;       // Сообщение об ошибке (если есть)
 }
 
-// Уведомление по каналу
-message NotificationChannel {
-  string user_id = 1;             // ID пользователя
-  string channel = 2;             // Канал (email, fcm, telegram)
-  string value = 3;               // Значение канала (например, токен или email)
-  string metadata = 4;            // Дополнительные данные
+message UserChannelsRequest {
+  string user_id =1;
 }
 
-// Ответ на запрос получения всех каналов для пользователя
-message GetUserChannelsResponse {
-  repeated NotificationChannel channels = 1; // Список каналов
+message GetUserChannelsResponse{
+  string user_id =1;
+  repeated string channel=2;
 }
 
 // Сертификат для подключения
 service NotificationService {
   // Подписка на уведомления
-  rpc Subscribe(SubscribeRequest) returns (SendNotificationResponse);
+  rpc Subscribe(SubscribeRequest) returns (SuccessResponse);
 
   // Отписка от уведомлений
-  rpc Unsubscribe(UnsubscribeRequest) returns (SendNotificationResponse);
+  rpc Unsubscribe(UnsubscribeRequest) returns (SuccessResponse);
 
   // Отправка уведомления
-  rpc SendNotification(SendNotificationRequest) returns (SendNotificationResponse);
+  rpc SendNotification(UserNotification) returns (UserNotification);
 
   // Получение каналов уведомлений пользователя
-  rpc GetUserChannels(GetUserChannelsRequest) returns (GetUserChannelsResponse);
-}
-
-// Запрос для получения всех каналов
-message GetUserChannelsRequest {
-  string user_id = 1;  // ID пользователя
+  rpc GetUserChannels(UserChannelsRequest) returns (GetUserChannelsResponse);
 }

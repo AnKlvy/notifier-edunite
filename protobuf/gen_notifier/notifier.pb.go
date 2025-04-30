@@ -24,10 +24,9 @@ const (
 // Сообщение для отправки уведомлений
 type Notification struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // ID пользователя
-	Channel       string                 `protobuf:"bytes,2,opt,name=channel,proto3" json:"channel,omitempty"`             // Канал (email, fcm, telegram)
-	Message       string                 `protobuf:"bytes,3,opt,name=message,proto3" json:"message,omitempty"`             // Сообщение
-	Subject       string                 `protobuf:"bytes,4,opt,name=subject,proto3" json:"subject,omitempty"`             // Тема уведомления для email
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"` // Сообщение
+	Subject       string                 `protobuf:"bytes,2,opt,name=subject,proto3" json:"subject,omitempty"` //Тема
+	Metadata      map[string]string      `protobuf:"bytes,3,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -62,20 +61,6 @@ func (*Notification) Descriptor() ([]byte, []int) {
 	return file_notifier_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Notification) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-func (x *Notification) GetChannel() string {
-	if x != nil {
-		return x.Channel
-	}
-	return ""
-}
-
 func (x *Notification) GetMessage() string {
 	if x != nil {
 		return x.Message
@@ -90,20 +75,131 @@ func (x *Notification) GetSubject() string {
 	return ""
 }
 
+func (x *Notification) GetMetadata() map[string]string {
+	if x != nil {
+		return x.Metadata
+	}
+	return nil
+}
+
+type UserNotification struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // ID пользователя
+	Notification  *Notification          `protobuf:"bytes,2,opt,name=notification,proto3" json:"notification,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserNotification) Reset() {
+	*x = UserNotification{}
+	mi := &file_notifier_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserNotification) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserNotification) ProtoMessage() {}
+
+func (x *UserNotification) ProtoReflect() protoreflect.Message {
+	mi := &file_notifier_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserNotification.ProtoReflect.Descriptor instead.
+func (*UserNotification) Descriptor() ([]byte, []int) {
+	return file_notifier_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *UserNotification) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UserNotification) GetNotification() *Notification {
+	if x != nil {
+		return x.Notification
+	}
+	return nil
+}
+
+type UserNotificationListResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // ID пользователя
+	Notification  []*Notification        `protobuf:"bytes,2,rep,name=notification,proto3" json:"notification,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UserNotificationListResponse) Reset() {
+	*x = UserNotificationListResponse{}
+	mi := &file_notifier_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UserNotificationListResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserNotificationListResponse) ProtoMessage() {}
+
+func (x *UserNotificationListResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_notifier_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserNotificationListResponse.ProtoReflect.Descriptor instead.
+func (*UserNotificationListResponse) Descriptor() ([]byte, []int) {
+	return file_notifier_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *UserNotificationListResponse) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *UserNotificationListResponse) GetNotification() []*Notification {
+	if x != nil {
+		return x.Notification
+	}
+	return nil
+}
+
 // Запрос на подписку пользователя на канал уведомлений
 type SubscribeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // ID пользователя
-	Channel       string                 `protobuf:"bytes,2,opt,name=channel,proto3" json:"channel,omitempty"`             // Канал (email, fcm, telegram)
-	Value         string                 `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`                 // Токен или email
-	Metadata      string                 `protobuf:"bytes,4,opt,name=metadata,proto3" json:"metadata,omitempty"`           // Метаданные (например, устройство или статус)
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`                                                                 // ID пользователя
+	Channel       string                 `protobuf:"bytes,2,opt,name=channel,proto3" json:"channel,omitempty"`                                                                             // Канал (email, fcm, telegram)
+	Value         string                 `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`                                                                                 // Токен или email
+	Metadata      map[string]string      `protobuf:"bytes,4,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // Метаданные (например, устройство или статус)
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SubscribeRequest) Reset() {
 	*x = SubscribeRequest{}
-	mi := &file_notifier_proto_msgTypes[1]
+	mi := &file_notifier_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -115,7 +211,7 @@ func (x *SubscribeRequest) String() string {
 func (*SubscribeRequest) ProtoMessage() {}
 
 func (x *SubscribeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_notifier_proto_msgTypes[1]
+	mi := &file_notifier_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -128,7 +224,7 @@ func (x *SubscribeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SubscribeRequest.ProtoReflect.Descriptor instead.
 func (*SubscribeRequest) Descriptor() ([]byte, []int) {
-	return file_notifier_proto_rawDescGZIP(), []int{1}
+	return file_notifier_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *SubscribeRequest) GetUserId() string {
@@ -152,11 +248,11 @@ func (x *SubscribeRequest) GetValue() string {
 	return ""
 }
 
-func (x *SubscribeRequest) GetMetadata() string {
+func (x *SubscribeRequest) GetMetadata() map[string]string {
 	if x != nil {
 		return x.Metadata
 	}
-	return ""
+	return nil
 }
 
 // Запрос на отписку пользователя от канала
@@ -170,7 +266,7 @@ type UnsubscribeRequest struct {
 
 func (x *UnsubscribeRequest) Reset() {
 	*x = UnsubscribeRequest{}
-	mi := &file_notifier_proto_msgTypes[2]
+	mi := &file_notifier_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -182,7 +278,7 @@ func (x *UnsubscribeRequest) String() string {
 func (*UnsubscribeRequest) ProtoMessage() {}
 
 func (x *UnsubscribeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_notifier_proto_msgTypes[2]
+	mi := &file_notifier_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -195,7 +291,7 @@ func (x *UnsubscribeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UnsubscribeRequest.ProtoReflect.Descriptor instead.
 func (*UnsubscribeRequest) Descriptor() ([]byte, []int) {
-	return file_notifier_proto_rawDescGZIP(), []int{2}
+	return file_notifier_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *UnsubscribeRequest) GetUserId() string {
@@ -212,69 +308,8 @@ func (x *UnsubscribeRequest) GetChannel() string {
 	return ""
 }
 
-// Запрос на отправку уведомления
-type SendNotificationRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // ID пользователя
-	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`             // Сообщение
-	Channel       string                 `protobuf:"bytes,3,opt,name=channel,proto3" json:"channel,omitempty"`             // Канал (email, fcm, telegram)
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *SendNotificationRequest) Reset() {
-	*x = SendNotificationRequest{}
-	mi := &file_notifier_proto_msgTypes[3]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *SendNotificationRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*SendNotificationRequest) ProtoMessage() {}
-
-func (x *SendNotificationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_notifier_proto_msgTypes[3]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use SendNotificationRequest.ProtoReflect.Descriptor instead.
-func (*SendNotificationRequest) Descriptor() ([]byte, []int) {
-	return file_notifier_proto_rawDescGZIP(), []int{3}
-}
-
-func (x *SendNotificationRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-func (x *SendNotificationRequest) GetMessage() string {
-	if x != nil {
-		return x.Message
-	}
-	return ""
-}
-
-func (x *SendNotificationRequest) GetChannel() string {
-	if x != nil {
-		return x.Channel
-	}
-	return ""
-}
-
 // Ответ на запрос отправки уведомления
-type SendNotificationResponse struct {
+type SuccessResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`                              // Успешно ли отправлено
 	ErrorMessage  string                 `protobuf:"bytes,2,opt,name=error_message,json=errorMessage,proto3" json:"error_message,omitempty"` // Сообщение об ошибке (если есть)
@@ -282,21 +317,21 @@ type SendNotificationResponse struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SendNotificationResponse) Reset() {
-	*x = SendNotificationResponse{}
-	mi := &file_notifier_proto_msgTypes[4]
+func (x *SuccessResponse) Reset() {
+	*x = SuccessResponse{}
+	mi := &file_notifier_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SendNotificationResponse) String() string {
+func (x *SuccessResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SendNotificationResponse) ProtoMessage() {}
+func (*SuccessResponse) ProtoMessage() {}
 
-func (x *SendNotificationResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_notifier_proto_msgTypes[4]
+func (x *SuccessResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_notifier_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -307,51 +342,47 @@ func (x *SendNotificationResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SendNotificationResponse.ProtoReflect.Descriptor instead.
-func (*SendNotificationResponse) Descriptor() ([]byte, []int) {
-	return file_notifier_proto_rawDescGZIP(), []int{4}
+// Deprecated: Use SuccessResponse.ProtoReflect.Descriptor instead.
+func (*SuccessResponse) Descriptor() ([]byte, []int) {
+	return file_notifier_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *SendNotificationResponse) GetSuccess() bool {
+func (x *SuccessResponse) GetSuccess() bool {
 	if x != nil {
 		return x.Success
 	}
 	return false
 }
 
-func (x *SendNotificationResponse) GetErrorMessage() string {
+func (x *SuccessResponse) GetErrorMessage() string {
 	if x != nil {
 		return x.ErrorMessage
 	}
 	return ""
 }
 
-// Уведомление по каналу
-type NotificationChannel struct {
+type UserChannelsRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // ID пользователя
-	Channel       string                 `protobuf:"bytes,2,opt,name=channel,proto3" json:"channel,omitempty"`             // Канал (email, fcm, telegram)
-	Value         string                 `protobuf:"bytes,3,opt,name=value,proto3" json:"value,omitempty"`                 // Значение канала (например, токен или email)
-	Metadata      string                 `protobuf:"bytes,4,opt,name=metadata,proto3" json:"metadata,omitempty"`           // Дополнительные данные
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *NotificationChannel) Reset() {
-	*x = NotificationChannel{}
-	mi := &file_notifier_proto_msgTypes[5]
+func (x *UserChannelsRequest) Reset() {
+	*x = UserChannelsRequest{}
+	mi := &file_notifier_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *NotificationChannel) String() string {
+func (x *UserChannelsRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*NotificationChannel) ProtoMessage() {}
+func (*UserChannelsRequest) ProtoMessage() {}
 
-func (x *NotificationChannel) ProtoReflect() protoreflect.Message {
-	mi := &file_notifier_proto_msgTypes[5]
+func (x *UserChannelsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notifier_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -362,50 +393,29 @@ func (x *NotificationChannel) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use NotificationChannel.ProtoReflect.Descriptor instead.
-func (*NotificationChannel) Descriptor() ([]byte, []int) {
-	return file_notifier_proto_rawDescGZIP(), []int{5}
+// Deprecated: Use UserChannelsRequest.ProtoReflect.Descriptor instead.
+func (*UserChannelsRequest) Descriptor() ([]byte, []int) {
+	return file_notifier_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *NotificationChannel) GetUserId() string {
+func (x *UserChannelsRequest) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
-func (x *NotificationChannel) GetChannel() string {
-	if x != nil {
-		return x.Channel
-	}
-	return ""
-}
-
-func (x *NotificationChannel) GetValue() string {
-	if x != nil {
-		return x.Value
-	}
-	return ""
-}
-
-func (x *NotificationChannel) GetMetadata() string {
-	if x != nil {
-		return x.Metadata
-	}
-	return ""
-}
-
-// Ответ на запрос получения всех каналов для пользователя
 type GetUserChannelsResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Channels      []*NotificationChannel `protobuf:"bytes,1,rep,name=channels,proto3" json:"channels,omitempty"` // Список каналов
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Channel       []string               `protobuf:"bytes,2,rep,name=channel,proto3" json:"channel,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *GetUserChannelsResponse) Reset() {
 	*x = GetUserChannelsResponse{}
-	mi := &file_notifier_proto_msgTypes[6]
+	mi := &file_notifier_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -417,7 +427,7 @@ func (x *GetUserChannelsResponse) String() string {
 func (*GetUserChannelsResponse) ProtoMessage() {}
 
 func (x *GetUserChannelsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_notifier_proto_msgTypes[6]
+	mi := &file_notifier_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -430,100 +440,65 @@ func (x *GetUserChannelsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetUserChannelsResponse.ProtoReflect.Descriptor instead.
 func (*GetUserChannelsResponse) Descriptor() ([]byte, []int) {
-	return file_notifier_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *GetUserChannelsResponse) GetChannels() []*NotificationChannel {
-	if x != nil {
-		return x.Channels
-	}
-	return nil
-}
-
-// Запрос для получения всех каналов
-type GetUserChannelsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"` // ID пользователя
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetUserChannelsRequest) Reset() {
-	*x = GetUserChannelsRequest{}
-	mi := &file_notifier_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetUserChannelsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserChannelsRequest) ProtoMessage() {}
-
-func (x *GetUserChannelsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_notifier_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserChannelsRequest.ProtoReflect.Descriptor instead.
-func (*GetUserChannelsRequest) Descriptor() ([]byte, []int) {
 	return file_notifier_proto_rawDescGZIP(), []int{7}
 }
 
-func (x *GetUserChannelsRequest) GetUserId() string {
+func (x *GetUserChannelsResponse) GetUserId() string {
 	if x != nil {
 		return x.UserId
 	}
 	return ""
 }
 
+func (x *GetUserChannelsResponse) GetChannel() []string {
+	if x != nil {
+		return x.Channel
+	}
+	return nil
+}
+
 var File_notifier_proto protoreflect.FileDescriptor
 
 const file_notifier_proto_rawDesc = "" +
 	"\n" +
-	"\x0enotifier.proto\x12\x06notify\"u\n" +
-	"\fNotification\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
-	"\achannel\x18\x02 \x01(\tR\achannel\x12\x18\n" +
-	"\amessage\x18\x03 \x01(\tR\amessage\x12\x18\n" +
-	"\asubject\x18\x04 \x01(\tR\asubject\"w\n" +
+	"\x0enotifier.proto\x12\x06notify\"\xbf\x01\n" +
+	"\fNotification\x12\x18\n" +
+	"\amessage\x18\x01 \x01(\tR\amessage\x12\x18\n" +
+	"\asubject\x18\x02 \x01(\tR\asubject\x12>\n" +
+	"\bmetadata\x18\x03 \x03(\v2\".notify.Notification.MetadataEntryR\bmetadata\x1a;\n" +
+	"\rMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"e\n" +
+	"\x10UserNotification\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x128\n" +
+	"\fnotification\x18\x02 \x01(\v2\x14.notify.NotificationR\fnotification\"q\n" +
+	"\x1cUserNotificationListResponse\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x128\n" +
+	"\fnotification\x18\x02 \x03(\v2\x14.notify.NotificationR\fnotification\"\xdc\x01\n" +
 	"\x10SubscribeRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
 	"\achannel\x18\x02 \x01(\tR\achannel\x12\x14\n" +
-	"\x05value\x18\x03 \x01(\tR\x05value\x12\x1a\n" +
-	"\bmetadata\x18\x04 \x01(\tR\bmetadata\"G\n" +
+	"\x05value\x18\x03 \x01(\tR\x05value\x12B\n" +
+	"\bmetadata\x18\x04 \x03(\v2&.notify.SubscribeRequest.MetadataEntryR\bmetadata\x1a;\n" +
+	"\rMetadataEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"G\n" +
 	"\x12UnsubscribeRequest\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
-	"\achannel\x18\x02 \x01(\tR\achannel\"f\n" +
-	"\x17SendNotificationRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\x12\x18\n" +
-	"\achannel\x18\x03 \x01(\tR\achannel\"Y\n" +
-	"\x18SendNotificationResponse\x12\x18\n" +
+	"\achannel\x18\x02 \x01(\tR\achannel\"P\n" +
+	"\x0fSuccessResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\"z\n" +
-	"\x13NotificationChannel\x12\x17\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\".\n" +
+	"\x13UserChannelsRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"L\n" +
+	"\x17GetUserChannelsResponse\x12\x17\n" +
 	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
-	"\achannel\x18\x02 \x01(\tR\achannel\x12\x14\n" +
-	"\x05value\x18\x03 \x01(\tR\x05value\x12\x1a\n" +
-	"\bmetadata\x18\x04 \x01(\tR\bmetadata\"R\n" +
-	"\x17GetUserChannelsResponse\x127\n" +
-	"\bchannels\x18\x01 \x03(\v2\x1b.notify.NotificationChannelR\bchannels\"1\n" +
-	"\x16GetUserChannelsRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId2\xd6\x02\n" +
-	"\x13NotificationService\x12G\n" +
-	"\tSubscribe\x12\x18.notify.SubscribeRequest\x1a .notify.SendNotificationResponse\x12K\n" +
-	"\vUnsubscribe\x12\x1a.notify.UnsubscribeRequest\x1a .notify.SendNotificationResponse\x12U\n" +
-	"\x10SendNotification\x12\x1f.notify.SendNotificationRequest\x1a .notify.SendNotificationResponse\x12R\n" +
-	"\x0fGetUserChannels\x12\x1e.notify.GetUserChannelsRequest\x1a\x1f.notify.GetUserChannelsResponseB8Z6github.com/AnKlvy/notify-service/protobuf/gen_notifierb\x06proto3"
+	"\achannel\x18\x02 \x03(\tR\achannel2\xb2\x02\n" +
+	"\x13NotificationService\x12>\n" +
+	"\tSubscribe\x12\x18.notify.SubscribeRequest\x1a\x17.notify.SuccessResponse\x12B\n" +
+	"\vUnsubscribe\x12\x1a.notify.UnsubscribeRequest\x1a\x17.notify.SuccessResponse\x12F\n" +
+	"\x10SendNotification\x12\x18.notify.UserNotification\x1a\x18.notify.UserNotification\x12O\n" +
+	"\x0fGetUserChannels\x12\x1b.notify.UserChannelsRequest\x1a\x1f.notify.GetUserChannelsResponseB8Z6github.com/AnKlvy/notify-service/protobuf/gen_notifierb\x06proto3"
 
 var (
 	file_notifier_proto_rawDescOnce sync.Once
@@ -537,32 +512,37 @@ func file_notifier_proto_rawDescGZIP() []byte {
 	return file_notifier_proto_rawDescData
 }
 
-var file_notifier_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_notifier_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_notifier_proto_goTypes = []any{
-	(*Notification)(nil),             // 0: notify.Notification
-	(*SubscribeRequest)(nil),         // 1: notify.SubscribeRequest
-	(*UnsubscribeRequest)(nil),       // 2: notify.UnsubscribeRequest
-	(*SendNotificationRequest)(nil),  // 3: notify.SendNotificationRequest
-	(*SendNotificationResponse)(nil), // 4: notify.SendNotificationResponse
-	(*NotificationChannel)(nil),      // 5: notify.NotificationChannel
-	(*GetUserChannelsResponse)(nil),  // 6: notify.GetUserChannelsResponse
-	(*GetUserChannelsRequest)(nil),   // 7: notify.GetUserChannelsRequest
+	(*Notification)(nil),                 // 0: notify.Notification
+	(*UserNotification)(nil),             // 1: notify.UserNotification
+	(*UserNotificationListResponse)(nil), // 2: notify.UserNotificationListResponse
+	(*SubscribeRequest)(nil),             // 3: notify.SubscribeRequest
+	(*UnsubscribeRequest)(nil),           // 4: notify.UnsubscribeRequest
+	(*SuccessResponse)(nil),              // 5: notify.SuccessResponse
+	(*UserChannelsRequest)(nil),          // 6: notify.UserChannelsRequest
+	(*GetUserChannelsResponse)(nil),      // 7: notify.GetUserChannelsResponse
+	nil,                                  // 8: notify.Notification.MetadataEntry
+	nil,                                  // 9: notify.SubscribeRequest.MetadataEntry
 }
 var file_notifier_proto_depIdxs = []int32{
-	5, // 0: notify.GetUserChannelsResponse.channels:type_name -> notify.NotificationChannel
-	1, // 1: notify.NotificationService.Subscribe:input_type -> notify.SubscribeRequest
-	2, // 2: notify.NotificationService.Unsubscribe:input_type -> notify.UnsubscribeRequest
-	3, // 3: notify.NotificationService.SendNotification:input_type -> notify.SendNotificationRequest
-	7, // 4: notify.NotificationService.GetUserChannels:input_type -> notify.GetUserChannelsRequest
-	4, // 5: notify.NotificationService.Subscribe:output_type -> notify.SendNotificationResponse
-	4, // 6: notify.NotificationService.Unsubscribe:output_type -> notify.SendNotificationResponse
-	4, // 7: notify.NotificationService.SendNotification:output_type -> notify.SendNotificationResponse
-	6, // 8: notify.NotificationService.GetUserChannels:output_type -> notify.GetUserChannelsResponse
-	5, // [5:9] is the sub-list for method output_type
-	1, // [1:5] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	8, // 0: notify.Notification.metadata:type_name -> notify.Notification.MetadataEntry
+	0, // 1: notify.UserNotification.notification:type_name -> notify.Notification
+	0, // 2: notify.UserNotificationListResponse.notification:type_name -> notify.Notification
+	9, // 3: notify.SubscribeRequest.metadata:type_name -> notify.SubscribeRequest.MetadataEntry
+	3, // 4: notify.NotificationService.Subscribe:input_type -> notify.SubscribeRequest
+	4, // 5: notify.NotificationService.Unsubscribe:input_type -> notify.UnsubscribeRequest
+	1, // 6: notify.NotificationService.SendNotification:input_type -> notify.UserNotification
+	6, // 7: notify.NotificationService.GetUserChannels:input_type -> notify.UserChannelsRequest
+	5, // 8: notify.NotificationService.Subscribe:output_type -> notify.SuccessResponse
+	5, // 9: notify.NotificationService.Unsubscribe:output_type -> notify.SuccessResponse
+	1, // 10: notify.NotificationService.SendNotification:output_type -> notify.UserNotification
+	7, // 11: notify.NotificationService.GetUserChannels:output_type -> notify.GetUserChannelsResponse
+	8, // [8:12] is the sub-list for method output_type
+	4, // [4:8] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_notifier_proto_init() }
@@ -576,7 +556,7 @@ func file_notifier_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_notifier_proto_rawDesc), len(file_notifier_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

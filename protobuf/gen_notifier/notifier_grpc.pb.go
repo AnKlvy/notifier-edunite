@@ -32,13 +32,13 @@ const (
 // Сертификат для подключения
 type NotificationServiceClient interface {
 	// Подписка на уведомления
-	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SendNotificationResponse, error)
+	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
 	// Отписка от уведомлений
-	Unsubscribe(ctx context.Context, in *UnsubscribeRequest, opts ...grpc.CallOption) (*SendNotificationResponse, error)
+	Unsubscribe(ctx context.Context, in *UnsubscribeRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
 	// Отправка уведомления
-	SendNotification(ctx context.Context, in *SendNotificationRequest, opts ...grpc.CallOption) (*SendNotificationResponse, error)
+	SendNotification(ctx context.Context, in *UserNotification, opts ...grpc.CallOption) (*UserNotification, error)
 	// Получение каналов уведомлений пользователя
-	GetUserChannels(ctx context.Context, in *GetUserChannelsRequest, opts ...grpc.CallOption) (*GetUserChannelsResponse, error)
+	GetUserChannels(ctx context.Context, in *UserChannelsRequest, opts ...grpc.CallOption) (*GetUserChannelsResponse, error)
 }
 
 type notificationServiceClient struct {
@@ -49,9 +49,9 @@ func NewNotificationServiceClient(cc grpc.ClientConnInterface) NotificationServi
 	return &notificationServiceClient{cc}
 }
 
-func (c *notificationServiceClient) Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SendNotificationResponse, error) {
+func (c *notificationServiceClient) Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SendNotificationResponse)
+	out := new(SuccessResponse)
 	err := c.cc.Invoke(ctx, NotificationService_Subscribe_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -59,9 +59,9 @@ func (c *notificationServiceClient) Subscribe(ctx context.Context, in *Subscribe
 	return out, nil
 }
 
-func (c *notificationServiceClient) Unsubscribe(ctx context.Context, in *UnsubscribeRequest, opts ...grpc.CallOption) (*SendNotificationResponse, error) {
+func (c *notificationServiceClient) Unsubscribe(ctx context.Context, in *UnsubscribeRequest, opts ...grpc.CallOption) (*SuccessResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SendNotificationResponse)
+	out := new(SuccessResponse)
 	err := c.cc.Invoke(ctx, NotificationService_Unsubscribe_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -69,9 +69,9 @@ func (c *notificationServiceClient) Unsubscribe(ctx context.Context, in *Unsubsc
 	return out, nil
 }
 
-func (c *notificationServiceClient) SendNotification(ctx context.Context, in *SendNotificationRequest, opts ...grpc.CallOption) (*SendNotificationResponse, error) {
+func (c *notificationServiceClient) SendNotification(ctx context.Context, in *UserNotification, opts ...grpc.CallOption) (*UserNotification, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(SendNotificationResponse)
+	out := new(UserNotification)
 	err := c.cc.Invoke(ctx, NotificationService_SendNotification_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (c *notificationServiceClient) SendNotification(ctx context.Context, in *Se
 	return out, nil
 }
 
-func (c *notificationServiceClient) GetUserChannels(ctx context.Context, in *GetUserChannelsRequest, opts ...grpc.CallOption) (*GetUserChannelsResponse, error) {
+func (c *notificationServiceClient) GetUserChannels(ctx context.Context, in *UserChannelsRequest, opts ...grpc.CallOption) (*GetUserChannelsResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetUserChannelsResponse)
 	err := c.cc.Invoke(ctx, NotificationService_GetUserChannels_FullMethodName, in, out, cOpts...)
@@ -96,13 +96,13 @@ func (c *notificationServiceClient) GetUserChannels(ctx context.Context, in *Get
 // Сертификат для подключения
 type NotificationServiceServer interface {
 	// Подписка на уведомления
-	Subscribe(context.Context, *SubscribeRequest) (*SendNotificationResponse, error)
+	Subscribe(context.Context, *SubscribeRequest) (*SuccessResponse, error)
 	// Отписка от уведомлений
-	Unsubscribe(context.Context, *UnsubscribeRequest) (*SendNotificationResponse, error)
+	Unsubscribe(context.Context, *UnsubscribeRequest) (*SuccessResponse, error)
 	// Отправка уведомления
-	SendNotification(context.Context, *SendNotificationRequest) (*SendNotificationResponse, error)
+	SendNotification(context.Context, *UserNotification) (*UserNotification, error)
 	// Получение каналов уведомлений пользователя
-	GetUserChannels(context.Context, *GetUserChannelsRequest) (*GetUserChannelsResponse, error)
+	GetUserChannels(context.Context, *UserChannelsRequest) (*GetUserChannelsResponse, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -113,16 +113,16 @@ type NotificationServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedNotificationServiceServer struct{}
 
-func (UnimplementedNotificationServiceServer) Subscribe(context.Context, *SubscribeRequest) (*SendNotificationResponse, error) {
+func (UnimplementedNotificationServiceServer) Subscribe(context.Context, *SubscribeRequest) (*SuccessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
 }
-func (UnimplementedNotificationServiceServer) Unsubscribe(context.Context, *UnsubscribeRequest) (*SendNotificationResponse, error) {
+func (UnimplementedNotificationServiceServer) Unsubscribe(context.Context, *UnsubscribeRequest) (*SuccessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Unsubscribe not implemented")
 }
-func (UnimplementedNotificationServiceServer) SendNotification(context.Context, *SendNotificationRequest) (*SendNotificationResponse, error) {
+func (UnimplementedNotificationServiceServer) SendNotification(context.Context, *UserNotification) (*UserNotification, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendNotification not implemented")
 }
-func (UnimplementedNotificationServiceServer) GetUserChannels(context.Context, *GetUserChannelsRequest) (*GetUserChannelsResponse, error) {
+func (UnimplementedNotificationServiceServer) GetUserChannels(context.Context, *UserChannelsRequest) (*GetUserChannelsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserChannels not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
@@ -183,7 +183,7 @@ func _NotificationService_Unsubscribe_Handler(srv interface{}, ctx context.Conte
 }
 
 func _NotificationService_SendNotification_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SendNotificationRequest)
+	in := new(UserNotification)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -195,13 +195,13 @@ func _NotificationService_SendNotification_Handler(srv interface{}, ctx context.
 		FullMethod: NotificationService_SendNotification_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationServiceServer).SendNotification(ctx, req.(*SendNotificationRequest))
+		return srv.(NotificationServiceServer).SendNotification(ctx, req.(*UserNotification))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
 func _NotificationService_GetUserChannels_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUserChannelsRequest)
+	in := new(UserChannelsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -213,7 +213,7 @@ func _NotificationService_GetUserChannels_Handler(srv interface{}, ctx context.C
 		FullMethod: NotificationService_GetUserChannels_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationServiceServer).GetUserChannels(ctx, req.(*GetUserChannelsRequest))
+		return srv.(NotificationServiceServer).GetUserChannels(ctx, req.(*UserChannelsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
