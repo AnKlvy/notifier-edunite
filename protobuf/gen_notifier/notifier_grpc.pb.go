@@ -22,7 +22,6 @@ const (
 	NotificationService_Subscribe_FullMethodName        = "/notify.NotificationService/Subscribe"
 	NotificationService_Unsubscribe_FullMethodName      = "/notify.NotificationService/Unsubscribe"
 	NotificationService_SendNotification_FullMethodName = "/notify.NotificationService/SendNotification"
-	NotificationService_GetUserChannels_FullMethodName  = "/notify.NotificationService/GetUserChannels"
 )
 
 // NotificationServiceClient is the client API for NotificationService service.
@@ -37,8 +36,6 @@ type NotificationServiceClient interface {
 	Unsubscribe(ctx context.Context, in *UnsubscribeRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
 	// Отправка уведомления
 	SendNotification(ctx context.Context, in *UserNotification, opts ...grpc.CallOption) (*UserNotification, error)
-	// Получение каналов уведомлений пользователя
-	GetUserChannels(ctx context.Context, in *UserChannelsRequest, opts ...grpc.CallOption) (*GetUserChannelsResponse, error)
 }
 
 type notificationServiceClient struct {
@@ -79,16 +76,6 @@ func (c *notificationServiceClient) SendNotification(ctx context.Context, in *Us
 	return out, nil
 }
 
-func (c *notificationServiceClient) GetUserChannels(ctx context.Context, in *UserChannelsRequest, opts ...grpc.CallOption) (*GetUserChannelsResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetUserChannelsResponse)
-	err := c.cc.Invoke(ctx, NotificationService_GetUserChannels_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations must embed UnimplementedNotificationServiceServer
 // for forward compatibility.
@@ -101,8 +88,6 @@ type NotificationServiceServer interface {
 	Unsubscribe(context.Context, *UnsubscribeRequest) (*SuccessResponse, error)
 	// Отправка уведомления
 	SendNotification(context.Context, *UserNotification) (*UserNotification, error)
-	// Получение каналов уведомлений пользователя
-	GetUserChannels(context.Context, *UserChannelsRequest) (*GetUserChannelsResponse, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -121,9 +106,6 @@ func (UnimplementedNotificationServiceServer) Unsubscribe(context.Context, *Unsu
 }
 func (UnimplementedNotificationServiceServer) SendNotification(context.Context, *UserNotification) (*UserNotification, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendNotification not implemented")
-}
-func (UnimplementedNotificationServiceServer) GetUserChannels(context.Context, *UserChannelsRequest) (*GetUserChannelsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetUserChannels not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 func (UnimplementedNotificationServiceServer) testEmbeddedByValue()                             {}
@@ -200,24 +182,6 @@ func _NotificationService_SendNotification_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
-func _NotificationService_GetUserChannels_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserChannelsRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NotificationServiceServer).GetUserChannels(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: NotificationService_GetUserChannels_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationServiceServer).GetUserChannels(ctx, req.(*UserChannelsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -236,10 +200,6 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendNotification",
 			Handler:    _NotificationService_SendNotification_Handler,
-		},
-		{
-			MethodName: "GetUserChannels",
-			Handler:    _NotificationService_GetUserChannels_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

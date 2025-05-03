@@ -25,7 +25,7 @@ const (
 type Notification struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"` // Сообщение
-	Subject       string                 `protobuf:"bytes,2,opt,name=subject,proto3" json:"subject,omitempty"` //Тема
+	Subject       string                 `protobuf:"bytes,2,opt,name=subject,proto3" json:"subject,omitempty"` // Тема
 	Metadata      map[string]string      `protobuf:"bytes,3,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -361,102 +361,6 @@ func (x *SuccessResponse) GetErrorMessage() string {
 	return ""
 }
 
-type UserChannelsRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *UserChannelsRequest) Reset() {
-	*x = UserChannelsRequest{}
-	mi := &file_notifier_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *UserChannelsRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*UserChannelsRequest) ProtoMessage() {}
-
-func (x *UserChannelsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_notifier_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use UserChannelsRequest.ProtoReflect.Descriptor instead.
-func (*UserChannelsRequest) Descriptor() ([]byte, []int) {
-	return file_notifier_proto_rawDescGZIP(), []int{6}
-}
-
-func (x *UserChannelsRequest) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-type GetUserChannelsResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Channel       []string               `protobuf:"bytes,2,rep,name=channel,proto3" json:"channel,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetUserChannelsResponse) Reset() {
-	*x = GetUserChannelsResponse{}
-	mi := &file_notifier_proto_msgTypes[7]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetUserChannelsResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetUserChannelsResponse) ProtoMessage() {}
-
-func (x *GetUserChannelsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_notifier_proto_msgTypes[7]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetUserChannelsResponse.ProtoReflect.Descriptor instead.
-func (*GetUserChannelsResponse) Descriptor() ([]byte, []int) {
-	return file_notifier_proto_rawDescGZIP(), []int{7}
-}
-
-func (x *GetUserChannelsResponse) GetUserId() string {
-	if x != nil {
-		return x.UserId
-	}
-	return ""
-}
-
-func (x *GetUserChannelsResponse) GetChannel() []string {
-	if x != nil {
-		return x.Channel
-	}
-	return nil
-}
-
 var File_notifier_proto protoreflect.FileDescriptor
 
 const file_notifier_proto_rawDesc = "" +
@@ -488,17 +392,11 @@ const file_notifier_proto_rawDesc = "" +
 	"\achannel\x18\x02 \x01(\tR\achannel\"P\n" +
 	"\x0fSuccessResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage\".\n" +
-	"\x13UserChannelsRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\"L\n" +
-	"\x17GetUserChannelsResponse\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x18\n" +
-	"\achannel\x18\x02 \x03(\tR\achannel2\xb2\x02\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage2\xe1\x01\n" +
 	"\x13NotificationService\x12>\n" +
 	"\tSubscribe\x12\x18.notify.SubscribeRequest\x1a\x17.notify.SuccessResponse\x12B\n" +
 	"\vUnsubscribe\x12\x1a.notify.UnsubscribeRequest\x1a\x17.notify.SuccessResponse\x12F\n" +
-	"\x10SendNotification\x12\x18.notify.UserNotification\x1a\x18.notify.UserNotification\x12O\n" +
-	"\x0fGetUserChannels\x12\x1b.notify.UserChannelsRequest\x1a\x1f.notify.GetUserChannelsResponseB8Z6github.com/AnKlvy/notify-service/protobuf/gen_notifierb\x06proto3"
+	"\x10SendNotification\x12\x18.notify.UserNotification\x1a\x18.notify.UserNotificationB8Z6github.com/AnKlvy/notify-service/protobuf/gen_notifierb\x06proto3"
 
 var (
 	file_notifier_proto_rawDescOnce sync.Once
@@ -512,7 +410,7 @@ func file_notifier_proto_rawDescGZIP() []byte {
 	return file_notifier_proto_rawDescData
 }
 
-var file_notifier_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_notifier_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_notifier_proto_goTypes = []any{
 	(*Notification)(nil),                 // 0: notify.Notification
 	(*UserNotification)(nil),             // 1: notify.UserNotification
@@ -520,26 +418,22 @@ var file_notifier_proto_goTypes = []any{
 	(*SubscribeRequest)(nil),             // 3: notify.SubscribeRequest
 	(*UnsubscribeRequest)(nil),           // 4: notify.UnsubscribeRequest
 	(*SuccessResponse)(nil),              // 5: notify.SuccessResponse
-	(*UserChannelsRequest)(nil),          // 6: notify.UserChannelsRequest
-	(*GetUserChannelsResponse)(nil),      // 7: notify.GetUserChannelsResponse
-	nil,                                  // 8: notify.Notification.MetadataEntry
-	nil,                                  // 9: notify.SubscribeRequest.MetadataEntry
+	nil,                                  // 6: notify.Notification.MetadataEntry
+	nil,                                  // 7: notify.SubscribeRequest.MetadataEntry
 }
 var file_notifier_proto_depIdxs = []int32{
-	8, // 0: notify.Notification.metadata:type_name -> notify.Notification.MetadataEntry
+	6, // 0: notify.Notification.metadata:type_name -> notify.Notification.MetadataEntry
 	0, // 1: notify.UserNotification.notification:type_name -> notify.Notification
 	0, // 2: notify.UserNotificationListResponse.notification:type_name -> notify.Notification
-	9, // 3: notify.SubscribeRequest.metadata:type_name -> notify.SubscribeRequest.MetadataEntry
+	7, // 3: notify.SubscribeRequest.metadata:type_name -> notify.SubscribeRequest.MetadataEntry
 	3, // 4: notify.NotificationService.Subscribe:input_type -> notify.SubscribeRequest
 	4, // 5: notify.NotificationService.Unsubscribe:input_type -> notify.UnsubscribeRequest
 	1, // 6: notify.NotificationService.SendNotification:input_type -> notify.UserNotification
-	6, // 7: notify.NotificationService.GetUserChannels:input_type -> notify.UserChannelsRequest
-	5, // 8: notify.NotificationService.Subscribe:output_type -> notify.SuccessResponse
-	5, // 9: notify.NotificationService.Unsubscribe:output_type -> notify.SuccessResponse
-	1, // 10: notify.NotificationService.SendNotification:output_type -> notify.UserNotification
-	7, // 11: notify.NotificationService.GetUserChannels:output_type -> notify.GetUserChannelsResponse
-	8, // [8:12] is the sub-list for method output_type
-	4, // [4:8] is the sub-list for method input_type
+	5, // 7: notify.NotificationService.Subscribe:output_type -> notify.SuccessResponse
+	5, // 8: notify.NotificationService.Unsubscribe:output_type -> notify.SuccessResponse
+	1, // 9: notify.NotificationService.SendNotification:output_type -> notify.UserNotification
+	7, // [7:10] is the sub-list for method output_type
+	4, // [4:7] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
 	4, // [4:4] is the sub-list for extension extendee
 	0, // [0:4] is the sub-list for field type_name
@@ -556,7 +450,7 @@ func file_notifier_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_notifier_proto_rawDesc), len(file_notifier_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   10,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

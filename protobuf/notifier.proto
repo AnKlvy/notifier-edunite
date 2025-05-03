@@ -7,7 +7,7 @@ option go_package = "github.com/AnKlvy/notify-service/protobuf/gen_notifier";
 // Сообщение для отправки уведомлений
 message Notification {
   string message = 1;                           // Сообщение
-  string subject = 2;                           //Тема
+  string subject = 2;                           // Тема
   map<string, string> metadata = 3;
 
 }
@@ -24,9 +24,9 @@ message UserNotificationListResponse {
 
 // Запрос на подписку пользователя на канал уведомлений
 message SubscribeRequest {
-  string user_id = 1;             // ID пользователя
-  string channel = 2;             // Канал (email, fcm, telegram)
-  string value = 3;               // Токен или email
+  string user_id = 1;                          // ID пользователя
+  string channel = 2;                          // Канал (email, fcm, telegram)
+  string value = 3;                            // Токен или email
   map<string, string> metadata = 4;            // Метаданные (например, устройство или статус)
 }
 
@@ -42,15 +42,6 @@ message SuccessResponse {
   string error_message = 2;       // Сообщение об ошибке (если есть)
 }
 
-message UserChannelsRequest {
-  string user_id =1;
-}
-
-message GetUserChannelsResponse{
-  string user_id =1;
-  repeated string channel=2;
-}
-
 // Сертификат для подключения
 service NotificationService {
   // Подписка на уведомления
@@ -62,6 +53,4 @@ service NotificationService {
   // Отправка уведомления
   rpc SendNotification(UserNotification) returns (UserNotification);
 
-  // Получение каналов уведомлений пользователя
-  rpc GetUserChannels(UserChannelsRequest) returns (GetUserChannelsResponse);
 }
