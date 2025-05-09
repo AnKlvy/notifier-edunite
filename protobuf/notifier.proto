@@ -6,9 +6,10 @@ option go_package = "github.com/AnKlvy/notify-service/protobuf/gen_notifier";
 
 // Сообщение для отправки уведомлений
 message Notification {
-  string message = 1;                           // Сообщение
-  string subject = 2;                           // Тема
-  map<string, string> metadata = 3;
+  string message = 1;
+  string subject = 2;
+  repeated string images=3;
+  map<string, string> metadata = 4;
 
 }
 
@@ -51,6 +52,8 @@ service NotificationService {
   rpc Unsubscribe(UnsubscribeRequest) returns (SuccessResponse);
 
   // Отправка уведомления
-  rpc SendNotification(UserNotification) returns (UserNotification);
+  rpc SendToOne(UserNotification) returns (UserNotification);
+
+  rpc SendToAll(Notification) returns (Notification);
 
 }

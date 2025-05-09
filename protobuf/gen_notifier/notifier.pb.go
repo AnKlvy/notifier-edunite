@@ -24,9 +24,10 @@ const (
 // Сообщение для отправки уведомлений
 type Notification struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"` // Сообщение
-	Subject       string                 `protobuf:"bytes,2,opt,name=subject,proto3" json:"subject,omitempty"` // Тема
-	Metadata      map[string]string      `protobuf:"bytes,3,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+	Subject       string                 `protobuf:"bytes,2,opt,name=subject,proto3" json:"subject,omitempty"`
+	Images        []string               `protobuf:"bytes,3,rep,name=images,proto3" json:"images,omitempty"`
+	Metadata      map[string]string      `protobuf:"bytes,4,rep,name=metadata,proto3" json:"metadata,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -73,6 +74,13 @@ func (x *Notification) GetSubject() string {
 		return x.Subject
 	}
 	return ""
+}
+
+func (x *Notification) GetImages() []string {
+	if x != nil {
+		return x.Images
+	}
+	return nil
 }
 
 func (x *Notification) GetMetadata() map[string]string {
@@ -365,11 +373,12 @@ var File_notifier_proto protoreflect.FileDescriptor
 
 const file_notifier_proto_rawDesc = "" +
 	"\n" +
-	"\x0enotifier.proto\x12\x06notify\"\xbf\x01\n" +
+	"\x0enotifier.proto\x12\x06notify\"\xd7\x01\n" +
 	"\fNotification\x12\x18\n" +
 	"\amessage\x18\x01 \x01(\tR\amessage\x12\x18\n" +
-	"\asubject\x18\x02 \x01(\tR\asubject\x12>\n" +
-	"\bmetadata\x18\x03 \x03(\v2\".notify.Notification.MetadataEntryR\bmetadata\x1a;\n" +
+	"\asubject\x18\x02 \x01(\tR\asubject\x12\x16\n" +
+	"\x06images\x18\x03 \x03(\tR\x06images\x12>\n" +
+	"\bmetadata\x18\x04 \x03(\v2\".notify.Notification.MetadataEntryR\bmetadata\x1a;\n" +
 	"\rMetadataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01\"e\n" +
@@ -392,11 +401,12 @@ const file_notifier_proto_rawDesc = "" +
 	"\achannel\x18\x02 \x01(\tR\achannel\"P\n" +
 	"\x0fSuccessResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12#\n" +
-	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage2\xe1\x01\n" +
+	"\rerror_message\x18\x02 \x01(\tR\ferrorMessage2\x93\x02\n" +
 	"\x13NotificationService\x12>\n" +
 	"\tSubscribe\x12\x18.notify.SubscribeRequest\x1a\x17.notify.SuccessResponse\x12B\n" +
-	"\vUnsubscribe\x12\x1a.notify.UnsubscribeRequest\x1a\x17.notify.SuccessResponse\x12F\n" +
-	"\x10SendNotification\x12\x18.notify.UserNotification\x1a\x18.notify.UserNotificationB8Z6github.com/AnKlvy/notify-service/protobuf/gen_notifierb\x06proto3"
+	"\vUnsubscribe\x12\x1a.notify.UnsubscribeRequest\x1a\x17.notify.SuccessResponse\x12?\n" +
+	"\tSendToOne\x12\x18.notify.UserNotification\x1a\x18.notify.UserNotification\x127\n" +
+	"\tSendToAll\x12\x14.notify.Notification\x1a\x14.notify.NotificationB8Z6github.com/AnKlvy/notify-service/protobuf/gen_notifierb\x06proto3"
 
 var (
 	file_notifier_proto_rawDescOnce sync.Once
@@ -428,12 +438,14 @@ var file_notifier_proto_depIdxs = []int32{
 	7, // 3: notify.SubscribeRequest.metadata:type_name -> notify.SubscribeRequest.MetadataEntry
 	3, // 4: notify.NotificationService.Subscribe:input_type -> notify.SubscribeRequest
 	4, // 5: notify.NotificationService.Unsubscribe:input_type -> notify.UnsubscribeRequest
-	1, // 6: notify.NotificationService.SendNotification:input_type -> notify.UserNotification
-	5, // 7: notify.NotificationService.Subscribe:output_type -> notify.SuccessResponse
-	5, // 8: notify.NotificationService.Unsubscribe:output_type -> notify.SuccessResponse
-	1, // 9: notify.NotificationService.SendNotification:output_type -> notify.UserNotification
-	7, // [7:10] is the sub-list for method output_type
-	4, // [4:7] is the sub-list for method input_type
+	1, // 6: notify.NotificationService.SendToOne:input_type -> notify.UserNotification
+	0, // 7: notify.NotificationService.SendToAll:input_type -> notify.Notification
+	5, // 8: notify.NotificationService.Subscribe:output_type -> notify.SuccessResponse
+	5, // 9: notify.NotificationService.Unsubscribe:output_type -> notify.SuccessResponse
+	1, // 10: notify.NotificationService.SendToOne:output_type -> notify.UserNotification
+	0, // 11: notify.NotificationService.SendToAll:output_type -> notify.Notification
+	8, // [8:12] is the sub-list for method output_type
+	4, // [4:8] is the sub-list for method input_type
 	4, // [4:4] is the sub-list for extension type_name
 	4, // [4:4] is the sub-list for extension extendee
 	0, // [0:4] is the sub-list for field type_name

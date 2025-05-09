@@ -1,13 +1,10 @@
 package main
 
 import (
-	"context"
 	"database/sql"
 	"github.com/AnKlvy/notifier-edunite/internal/database"
 	"github.com/AnKlvy/notifier-edunite/internal/services/notifier"
-	"github.com/nikoksr/notify"
-	"github.com/nikoksr/notify/service/fcm"
-	"github.com/nikoksr/notify/service/mail"
+	"github.com/AnKlvy/notifier-edunite/internal/services/notifier/email"
 )
 
 func initNotify(db *sql.DB) (*notifier.NotifyService, error) {
@@ -15,19 +12,16 @@ func initNotify(db *sql.DB) (*notifier.NotifyService, error) {
 	repo := database.NewNotifier(db)
 
 	//add services
-	emailSvc := mail.New("ver2@gmail.com", "587")
-	ctx := context.Background()
+	emailSvc := email.InitEmail()
 
-	fcmSvc, err := fcm.New(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-	notify.UseServices(emailSvc, fcmSvc)
+	//firebaseSvc, err := firebase.InitFirebase()
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	adapters := map[string]notifier.NotifyInterface{
 		"email": emailSvc,
-		"fcm":   fcmSvc,
+		//"firebase": firebaseSvc,
 	}
 
 	notifyService := notifier.NewNotifyService(repo, adapters)

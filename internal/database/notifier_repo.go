@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/AnKlvy/notifier-edunite/internal/validator"
 	"time"
@@ -13,7 +12,7 @@ import (
 type Notification struct {
 	Message  string
 	Subject  string
-	Images   []*string
+	Images   *[]string
 	Metadata map[string]string
 }
 
@@ -98,25 +97,57 @@ func (n *NotifierModel) SendNotification(userId string, notification *Notificati
 	return err
 }
 
-func (n *NotifierModel) GetReceiverByUserAndChannel(userId, channel string) (*string, error) {
-
+func (n *NotifierModel) GetReceiversByUserAndChannel(userId, channel string) ([]string, error) {
 	query := `
-    SELECT token FROM notifier_settings
-    WHERE user_id = $1 AND channel = $2`
+		SELECT token FROM notifier_settings
+		WHERE user_id = $1 AND channel = $2`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []any{userId, channel}
-	var token string
-	err := n.DB.QueryRowContext(ctx, query, args...).Scan(&token)
+	rows, err := n.DB.QueryContext(ctx, query, userId, channel)
 	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
-		default:
+		return nil, err
+	}
+	defer rows.Close()
+
+	return n.getTokensByRows(rows)
+}
+
+func (n *NotifierModel) GetAllReceiversByChannel(channel string) ([]string, error) {
+	query := `
+		SELECT token FROM notifier_settings
+		WHERE channel = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := n.DB.QueryContext(ctx, query, channel)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	return n.getTokensByRows(rows)
+}
+
+func (n *NotifierModel) getTokensByRows(rows *sql.Rows) ([]string, error) {
+	var tokens []string
+	for rows.Next() {
+		var token string
+		if err := rows.Scan(&token); err != nil {
 			return nil, err
 		}
+		tokens = append(tokens, token)
 	}
-	return &token, nil
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if len(tokens) == 0 {
+		return nil, ErrRecordNotFound
+	}
+
+	return tokens, nil
 }

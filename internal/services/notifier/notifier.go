@@ -3,13 +3,12 @@ package notifier
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/AnKlvy/notifier-edunite/internal/database"
-	"github.com/nikoksr/notify"
 )
 
 type NotifyInterface interface {
-	notify.Notifier
-	AddReceivers(receivers ...string)
+	Send(ctx context.Context, subject string, message string, receivers []string, images ...string) error
 }
 
 func NewNotifyService(repo database.Models, services map[string]NotifyInterface) *NotifyService {
@@ -39,29 +38,40 @@ func (n *NotifyService) Unsubscribe(userId string, channel string) error {
 	return nil
 }
 
-func (n *NotifyService) SendNotification(ctx context.Context, userId string, notification *database.Notification) error {
-
+func (n *NotifyService) SendToOneByChannel(ctx context.Context, userId string, notification *database.Notification) error {
 	for channel, service := range n.services {
-		token, err := n.repo.Notifier.GetReceiverByUserAndChannel(userId, channel)
-		if err != nil {
-			if errors.Is(err, database.ErrRecordNotFound) {
-				continue // пользователь не подписан на этот канал — пропускаем
-			}
-			return err // другая ошибка — возвращаем
-		}
-
-		service.AddReceivers(*token)
-
-		if &token != nil {
-			err = service.Send(ctx, notification.Subject, notification.Message)
-			if err != nil {
-				return err // можно также логировать и продолжить, если не критично
-			}
-		}
+		tokens, err := n.repo.Notifier.GetReceiversByUserAndChannel(userId, channel)
+		err = n.send(ctx, service, tokens, err, notification)
 	}
 	err := n.repo.Notifier.SendNotification(userId, notification)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (n *NotifyService) SendToAll(ctx context.Context, notification *database.Notification) error {
+	for channel, service := range n.services {
+		tokens, err := n.repo.Notifier.GetAllReceiversByChannel(channel)
+		err = n.send(ctx, service, tokens, err, notification)
+	}
+	err := n.repo.Notifier.SendNotification("all", notification)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (n *NotifyService) send(ctx context.Context, service NotifyInterface, tokens []string, err error, notification *database.Notification) error {
+	if err != nil {
+		if errors.Is(err, database.ErrRecordNotFound) {
+			return nil // пользователь не подписан на этот канал — пропускаем
+		}
+		return err // другая ошибка — возвращаем
+	}
+	err = service.Send(ctx, notification.Subject, notification.Message, tokens, *notification.Images...)
+	if err != nil {
+		return fmt.Errorf("error sending message to tokens: %v", err)
 	}
 	return nil
 }

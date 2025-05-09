@@ -17,7 +17,8 @@ type Models struct {
 		Subscribe(userId string, channel string, token string) error
 		Unsubscribe(userId string, channel string) error
 		SendNotification(userId string, notification *Notification) error
-		GetReceiverByUserAndChannel(userId string, channel string) (*string, error)
+		GetReceiversByUserAndChannel(userId string, channel string) ([]string, error)
+		GetAllReceiversByChannel(channel string) ([]string, error)
 	}
 }
 
