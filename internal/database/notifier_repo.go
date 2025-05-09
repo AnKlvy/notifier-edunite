@@ -42,9 +42,9 @@ func (n *NotifierModel) Subscribe(userId, channel, token string) error {
 	// Создаём контекст с тайм-аутом 3 секунды.
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-
+	_, err := n.DB.ExecContext(ctx, query, args...)
 	// Используем QueryRowContext() и передаём контекст в качестве первого аргумента.
-	return n.DB.QueryRowContext(ctx, query, args...).Scan()
+	return err
 }
 
 func (n *NotifierModel) Unsubscribe(userId, channel string) error {
@@ -78,7 +78,7 @@ func (n *NotifierModel) SendNotification(userId string, notification *Notificati
 	}
 
 	query := `
-   INSERT INTO notifiсations (user_id, message, subject, metadata)
+   INSERT INTO notifications (user_id, message, subject, metadata)
    VALUES ($1, $2, $3, $4)
    RETURNING id`
 	args := []any{userId, notification.Message, notification.Subject, metadataJSON}
@@ -86,9 +86,9 @@ func (n *NotifierModel) SendNotification(userId string, notification *Notificati
 	// Создаём контекст с тайм-аутом 3 секунды.
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-
+	_, err = n.DB.ExecContext(ctx, query, args...)
 	// Используем QueryRowContext() и передаём контекст в качестве первого аргумента.
-	return n.DB.QueryRowContext(ctx, query, args...).Scan()
+	return err
 }
 
 func (n *NotifierModel) GetReceiverByUserAndChannel(userId, channel string) (*string, error) {
