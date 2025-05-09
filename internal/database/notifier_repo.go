@@ -13,7 +13,14 @@ import (
 type Notification struct {
 	Message  string
 	Subject  string
+	Images   []*string
 	Metadata map[string]string
+}
+
+type NotifierSettings struct {
+	UserId  string
+	Channel string
+	Token   string
 }
 
 // ValidateNews выполняет валидацию данных новости.
