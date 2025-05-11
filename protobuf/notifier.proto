@@ -13,14 +13,9 @@ message Notification {
 
 }
 
-message UserNotification {
-  string user_id = 1;                           // ID пользователя
+message UsersNotification {
+  repeated string users_ids = 1;                           // ID пользователя
   Notification notification = 2;
-}
-
-message UserNotificationListResponse {
-  string user_id = 1;                           // ID пользователя
-  repeated Notification notification = 2;
 }
 
 // Запрос на подписку пользователя на канал уведомлений
@@ -52,7 +47,7 @@ service NotificationService {
   rpc Unsubscribe(UnsubscribeRequest) returns (SuccessResponse);
 
   // Отправка уведомления
-  rpc SendToOne(UserNotification) returns (UserNotification);
+  rpc SendToOneOrMany(UsersNotification) returns (UsersNotification);
 
   rpc SendToAll(Notification) returns (Notification);
 

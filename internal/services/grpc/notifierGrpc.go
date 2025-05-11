@@ -44,7 +44,7 @@ func (s *Service) Unsubscribe(ctx context.Context, request *gen_notifier.Unsubsc
 	return &gen_notifier.SuccessResponse{Success: true, ErrorMessage: ""}, nil
 }
 
-func (s *Service) SendToOne(ctx context.Context, notification *gen_notifier.UserNotification) (*gen_notifier.UserNotification, error) {
+func (s *Service) SendToOneOrMany(ctx context.Context, notification *gen_notifier.UsersNotification) (*gen_notifier.UsersNotification, error) {
 	images := notification.GetNotification().GetImages()
 	notifi := database.Notification{
 		Message:  notification.GetNotification().GetMessage(),
@@ -53,7 +53,7 @@ func (s *Service) SendToOne(ctx context.Context, notification *gen_notifier.User
 		Metadata: notification.GetNotification().GetMetadata(),
 	}
 
-	err := s.notifySrv.SendToOneByChannel(ctx, notification.GetUserId(), &notifi)
+	err := s.notifySrv.SendToOneOrManyByChannel(ctx, notification.GetUsersIds(), &notifi)
 	if err != nil {
 		return nil, err
 	}

@@ -38,12 +38,15 @@ func (n *NotifyService) Unsubscribe(userId string, channel string) error {
 	return nil
 }
 
-func (n *NotifyService) SendToOneByChannel(ctx context.Context, userId string, notification *database.Notification) error {
+func (n *NotifyService) SendToOneOrManyByChannel(ctx context.Context, userIds []string, notification *database.Notification) error {
 	for channel, service := range n.services {
-		tokens, err := n.repo.Notifier.GetReceiversByUserAndChannel(userId, channel)
+		tokens, err := n.repo.Notifier.GetReceiversByUsersAndChannel(userIds, channel)
 		err = n.send(ctx, service, tokens, err, notification)
+		if err != nil {
+			return err
+		}
 	}
-	err := n.repo.Notifier.SendNotification(userId, notification)
+	err := n.repo.Notifier.SendNotification(userIds, notification)
 	if err != nil {
 		return err
 	}
@@ -55,7 +58,7 @@ func (n *NotifyService) SendToAll(ctx context.Context, notification *database.No
 		tokens, err := n.repo.Notifier.GetAllReceiversByChannel(channel)
 		err = n.send(ctx, service, tokens, err, notification)
 	}
-	err := n.repo.Notifier.SendNotification("all", notification)
+	err := n.repo.Notifier.SendNotification([]string{"all"}, notification)
 	if err != nil {
 		return err
 	}

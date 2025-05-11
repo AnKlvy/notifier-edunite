@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	NotificationService_Subscribe_FullMethodName   = "/notify.NotificationService/Subscribe"
-	NotificationService_Unsubscribe_FullMethodName = "/notify.NotificationService/Unsubscribe"
-	NotificationService_SendToOne_FullMethodName   = "/notify.NotificationService/SendToOne"
-	NotificationService_SendToAll_FullMethodName   = "/notify.NotificationService/SendToAll"
+	NotificationService_Subscribe_FullMethodName       = "/notify.NotificationService/Subscribe"
+	NotificationService_Unsubscribe_FullMethodName     = "/notify.NotificationService/Unsubscribe"
+	NotificationService_SendToOneOrMany_FullMethodName = "/notify.NotificationService/SendToOneOrMany"
+	NotificationService_SendToAll_FullMethodName       = "/notify.NotificationService/SendToAll"
 )
 
 // NotificationServiceClient is the client API for NotificationService service.
@@ -36,7 +36,7 @@ type NotificationServiceClient interface {
 	// Отписка от уведомлений
 	Unsubscribe(ctx context.Context, in *UnsubscribeRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
 	// Отправка уведомления
-	SendToOne(ctx context.Context, in *UserNotification, opts ...grpc.CallOption) (*UserNotification, error)
+	SendToOneOrMany(ctx context.Context, in *UsersNotification, opts ...grpc.CallOption) (*UsersNotification, error)
 	SendToAll(ctx context.Context, in *Notification, opts ...grpc.CallOption) (*Notification, error)
 }
 
@@ -68,10 +68,10 @@ func (c *notificationServiceClient) Unsubscribe(ctx context.Context, in *Unsubsc
 	return out, nil
 }
 
-func (c *notificationServiceClient) SendToOne(ctx context.Context, in *UserNotification, opts ...grpc.CallOption) (*UserNotification, error) {
+func (c *notificationServiceClient) SendToOneOrMany(ctx context.Context, in *UsersNotification, opts ...grpc.CallOption) (*UsersNotification, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UserNotification)
-	err := c.cc.Invoke(ctx, NotificationService_SendToOne_FullMethodName, in, out, cOpts...)
+	out := new(UsersNotification)
+	err := c.cc.Invoke(ctx, NotificationService_SendToOneOrMany_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ type NotificationServiceServer interface {
 	// Отписка от уведомлений
 	Unsubscribe(context.Context, *UnsubscribeRequest) (*SuccessResponse, error)
 	// Отправка уведомления
-	SendToOne(context.Context, *UserNotification) (*UserNotification, error)
+	SendToOneOrMany(context.Context, *UsersNotification) (*UsersNotification, error)
 	SendToAll(context.Context, *Notification) (*Notification, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
@@ -117,8 +117,8 @@ func (UnimplementedNotificationServiceServer) Subscribe(context.Context, *Subscr
 func (UnimplementedNotificationServiceServer) Unsubscribe(context.Context, *UnsubscribeRequest) (*SuccessResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Unsubscribe not implemented")
 }
-func (UnimplementedNotificationServiceServer) SendToOne(context.Context, *UserNotification) (*UserNotification, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SendToOne not implemented")
+func (UnimplementedNotificationServiceServer) SendToOneOrMany(context.Context, *UsersNotification) (*UsersNotification, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendToOneOrMany not implemented")
 }
 func (UnimplementedNotificationServiceServer) SendToAll(context.Context, *Notification) (*Notification, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendToAll not implemented")
@@ -180,20 +180,20 @@ func _NotificationService_Unsubscribe_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _NotificationService_SendToOne_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserNotification)
+func _NotificationService_SendToOneOrMany_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UsersNotification)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NotificationServiceServer).SendToOne(ctx, in)
+		return srv.(NotificationServiceServer).SendToOneOrMany(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: NotificationService_SendToOne_FullMethodName,
+		FullMethod: NotificationService_SendToOneOrMany_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NotificationServiceServer).SendToOne(ctx, req.(*UserNotification))
+		return srv.(NotificationServiceServer).SendToOneOrMany(ctx, req.(*UsersNotification))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -232,8 +232,8 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _NotificationService_Unsubscribe_Handler,
 		},
 		{
-			MethodName: "SendToOne",
-			Handler:    _NotificationService_SendToOne_Handler,
+			MethodName: "SendToOneOrMany",
+			Handler:    _NotificationService_SendToOneOrMany_Handler,
 		},
 		{
 			MethodName: "SendToAll",

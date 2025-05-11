@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/AnKlvy/notifier-edunite/internal/validator"
+	"github.com/lib/pq"
 	"time"
 )
 
@@ -76,36 +77,50 @@ func (n *NotifierModel) Unsubscribe(userId, channel string) error {
 	}
 	return nil
 }
-func (n *NotifierModel) SendNotification(userId string, notification *Notification) error {
-	// Преобразуем map в JSON
+
+func (n *NotifierModel) SendNotification(userIds []string, notification *Notification) error {
 	metadataJSON, err := json.Marshal(notification.Metadata)
 	if err != nil {
 		return fmt.Errorf("failed to marshal metadata: %w", err)
 	}
 
-	query := `
-   INSERT INTO notifications (user_id, message, subject, metadata)
-   VALUES ($1, $2, $3, $4)
-   RETURNING id`
-	args := []any{userId, notification.Message, notification.Subject, metadataJSON}
-
-	// Создаём контекст с тайм-аутом 3 секунды.
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
-	_, err = n.DB.ExecContext(ctx, query, args...)
-	// Используем QueryRowContext() и передаём контекст в качестве первого аргумента.
-	return err
+
+	tx, err := n.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var notificationId int
+	query := `INSERT INTO notifications (message, subject, metadata, images)
+	          VALUES ($1, $2, $3, $4) RETURNING id`
+	err = tx.QueryRowContext(ctx, query, notification.Message, notification.Subject, metadataJSON, pq.Array(notification.Images)).Scan(&notificationId)
+	if err != nil {
+		return err
+	}
+
+	insertUserQuery := `INSERT INTO notifications_users (notification_id, user_id) VALUES ($1, $2)`
+	for _, userId := range userIds {
+		_, err := tx.ExecContext(ctx, insertUserQuery, notificationId, userId)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
-func (n *NotifierModel) GetReceiversByUserAndChannel(userId, channel string) ([]string, error) {
+func (n *NotifierModel) GetReceiversByUsersAndChannel(userIds []string, channel string) ([]string, error) {
 	query := `
 		SELECT token FROM notifier_settings
-		WHERE user_id = $1 AND channel = $2`
+		WHERE user_id = ANY($1) AND channel = $2`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := n.DB.QueryContext(ctx, query, userId, channel)
+	rows, err := n.DB.QueryContext(ctx, query, pq.Array(userIds), channel)
 	if err != nil {
 		return nil, err
 	}

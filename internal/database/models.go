@@ -16,8 +16,8 @@ type Models struct {
 	Notifier interface {
 		Subscribe(userId string, channel string, token string) error
 		Unsubscribe(userId string, channel string) error
-		SendNotification(userId string, notification *Notification) error
-		GetReceiversByUserAndChannel(userId string, channel string) ([]string, error)
+		SendNotification(userId []string, notification *Notification) error
+		GetReceiversByUsersAndChannel(userId []string, channel string) ([]string, error)
 		GetAllReceiversByChannel(channel string) ([]string, error)
 	}
 }
