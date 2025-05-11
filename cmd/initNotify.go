@@ -5,6 +5,7 @@ import (
 	"github.com/AnKlvy/notifier-edunite/internal/database"
 	"github.com/AnKlvy/notifier-edunite/internal/services/notifier"
 	"github.com/AnKlvy/notifier-edunite/internal/services/notifier/email"
+	"github.com/AnKlvy/notifier-edunite/internal/services/notifier/firebase"
 )
 
 func initNotify(db *sql.DB) (*notifier.NotifyService, error) {
@@ -14,14 +15,14 @@ func initNotify(db *sql.DB) (*notifier.NotifyService, error) {
 	//add services
 	emailSvc := email.InitEmail()
 
-	//firebaseSvc, err := firebase.InitFirebase()
-	//if err != nil {
-	//	return nil, err
-	//}
+	firebaseSvc, err := firebase.InitFirebase()
+	if err != nil {
+		return nil, err
+	}
 
 	adapters := map[string]notifier.NotifyInterface{
-		"email": emailSvc,
-		//"firebase": firebaseSvc,
+		"email":    emailSvc,
+		"firebase": firebaseSvc,
 	}
 
 	notifyService := notifier.NewNotifyService(repo, adapters)

@@ -8,6 +8,7 @@ import (
 	"mime"
 	"net"
 	"net/http"
+	"net/mail"
 	"net/smtp"
 	"net/textproto"
 	"os"
@@ -46,7 +47,7 @@ func InitEmail() *Mail {
 
 func (m *Mail) newEmail(subject, message string, receivers []string, files ...string) *email.Email {
 	msg := &email.Email{
-		To:      receivers,
+		To:      validEmails(receivers),
 		From:    m.senderAddress,
 		Subject: subject,
 		Headers: textproto.MIMEHeader{},
@@ -107,4 +108,17 @@ func AttachFromURL(msg *email.Email, fileURL string) (*email.Attachment, error) 
 	}
 
 	return msg.Attach(resp.Body, name, contentType)
+}
+
+// TODO вывести невалидные emails
+func validEmails(to []string) []string {
+	var validEmails []string
+
+	for _, addrStr := range to {
+		addr, err := mail.ParseAddress(addrStr)
+		if err == nil {
+			validEmails = append(validEmails, addr.Address)
+		}
+	}
+	return validEmails
 }
