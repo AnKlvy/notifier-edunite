@@ -21,8 +21,15 @@ func NewNotifierService(grpc *grpc.Server, notifySrv notifier.NotifyService) {
 }
 func (s *Service) Subscribe(ctx context.Context, request *gen_notifier.SubscribeRequest) (*gen_notifier.SuccessResponse, error) {
 	v := validator.New()
-	if database.ValidateSettings(v, request.GetUserId(), request.GetChannel(), request.GetValue()); !v.Valid() {
-		return nil, errors.New("invalid settings input data")
+	v.Check(request.GetValue() != "", "token", "must be provided")
+	v.Check(len(request.GetValue()) <= 500, "token", "must be no more than 500 characters")
+	database.ValidateSettings(v, request.GetUserId(), request.GetChannel())
+
+	if !v.Valid() {
+		return &gen_notifier.SuccessResponse{
+			Success:      false,
+			ErrorMessage: "invalid input data",
+		}, errors.New("invalid input data")
 	}
 
 	err := s.notifySrv.Subscribe(request.GetUserId(), request.GetChannel(), request.GetValue())
@@ -34,6 +41,16 @@ func (s *Service) Subscribe(ctx context.Context, request *gen_notifier.Subscribe
 }
 
 func (s *Service) Unsubscribe(ctx context.Context, request *gen_notifier.UnsubscribeRequest) (*gen_notifier.SuccessResponse, error) {
+	v := validator.New()
+	database.ValidateSettings(v, request.GetUserId(), request.GetChannel())
+
+	if !v.Valid() {
+		return &gen_notifier.SuccessResponse{
+			Success:      false,
+			ErrorMessage: "invalid input data",
+		}, errors.New("invalid input data")
+	}
+
 	err := s.notifySrv.Unsubscribe(request.GetUserId(), request.GetChannel())
 	if err != nil {
 		return &gen_notifier.SuccessResponse{
@@ -53,6 +70,14 @@ func (s *Service) SendToOneOrMany(ctx context.Context, notification *gen_notifie
 		Metadata: notification.GetNotification().GetMetadata(),
 	}
 
+	v := validator.New()
+
+	database.ValidateNotification(v, notifi)
+
+	if !v.Valid() {
+		return nil, errors.New("invalid notification input")
+	}
+
 	err := s.notifySrv.SendToOneOrManyByChannel(ctx, notification.GetUsersIds(), &notifi)
 	if err != nil {
 		return nil, err
@@ -68,6 +93,14 @@ func (s *Service) SendToAll(ctx context.Context, notification *gen_notifier.Noti
 		Subject:  notification.GetSubject(),
 		Images:   &images,
 		Metadata: notification.GetMetadata(),
+	}
+
+	v := validator.New()
+
+	database.ValidateNotification(v, notifi)
+
+	if !v.Valid() {
+		return nil, errors.New("invalid notification input")
 	}
 
 	err := s.notifySrv.SendToAll(ctx, &notifi)

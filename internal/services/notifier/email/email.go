@@ -110,7 +110,6 @@ func AttachFromURL(msg *email.Email, fileURL string) (*email.Attachment, error) 
 	return msg.Attach(resp.Body, name, contentType)
 }
 
-// TODO вывести невалидные emails
 func validEmails(to []string) []string {
 	var validEmails []string
 
@@ -118,6 +117,8 @@ func validEmails(to []string) []string {
 		addr, err := mail.ParseAddress(addrStr)
 		if err == nil {
 			validEmails = append(validEmails, addr.Address)
+		} else {
+			log.Printf("validEmails: error parsing email: %v\n", err)
 		}
 	}
 	return validEmails

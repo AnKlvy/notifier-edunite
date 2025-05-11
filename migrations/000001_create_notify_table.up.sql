@@ -1,9 +1,10 @@
--- CREATE TABLE IF NOT EXISTS notifier_settings (
---      id SERIAL PRIMARY KEY,
---      user_id TEXT NOT NULL,
---      channel TEXT NOT NULL,
---      token TEXT NOT NULL
---     );
+CREATE TABLE IF NOT EXISTS notifier_settings (
+     id SERIAL PRIMARY KEY,
+     user_id TEXT NOT NULL,
+     channel TEXT NOT NULL,
+     token TEXT NOT NULL
+     CHECK (channel IN ('email', 'firebase'))
+    );
 
 CREATE TABLE notifications (
        id SERIAL PRIMARY KEY,
@@ -11,8 +12,6 @@ CREATE TABLE notifications (
        subject TEXT NOT NULL,
        metadata JSONB,
        images TEXT[]
-    -- Можно добавить индекс для поиска по полям JSONB, если это необходимо
-    -- CREATE INDEX idx_metadata ON notifications USING gin(metadata);
 );
 
 CREATE TABLE notifications_users (

@@ -24,15 +24,25 @@ type NotifierSettings struct {
 }
 
 // ValidateNews выполняет валидацию данных новости.
-func ValidateNotification(v *validator.Validator, notification *Notification) {
-	v.Check(notification.Message != "", "message", "must be provided")
-	v.Check(notification.Subject != "", "subject", "must be provided")
+
+func ValidateSettings(v *validator.Validator, userId, channel string) {
+	v.Check(userId != "", "user_id", "must be provided")
+	v.Check(len(userId) <= 100, "user_id", "must be no more than 100 characters")
+	v.Check(validator.PermittedValue(channel, "email", "firebase"), "channel", "channel is required")
 }
 
-func ValidateSettings(v *validator.Validator, userId, channel, token string) {
-	v.Check(userId != "", "user_id", "must be provided")
-	v.Check(token != "", "token", "must be provided")
-	v.Check(channel != "", "channel", "must be provided")
+func ValidateNotification(v *validator.Validator, notification Notification) {
+	v.Check(notification.Message != "", "message", "message is required")
+	v.Check(len(notification.Message) <= 2000, "message", "message must be no more than 2000 characters")
+
+	v.Check(notification.Subject != "", "subject", "subject is required")
+	v.Check(len(notification.Subject) <= 255, "subject", "subject must be no more than 255 characters")
+
+	for i, img := range *notification.Images {
+		v.Check(img != "", "images", "image URL cannot be empty")
+		v.Check(len(img) <= 1000, "images", "image URL is too long")
+		v.Check(i < 10, "images", "too many images (max 10)")
+	}
 }
 
 type NotifierModel struct {

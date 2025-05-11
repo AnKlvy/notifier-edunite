@@ -5,4 +5,4 @@ DROP TABLE IF EXISTS notifications_users CASCADE;
 DROP TABLE IF EXISTS notifications CASCADE;
 
 -- Удаление таблицы notifier_settings
--- DROP TABLE IF EXISTS notifier_settings CASCADE;
+DROP TABLE IF EXISTS notifier_settings CASCADE;
