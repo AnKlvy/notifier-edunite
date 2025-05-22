@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/jordan-wright/email"
+	"io"
 	"log"
 	"mime"
 	"net"
@@ -14,6 +15,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 // Mail struct holds necessary data to send emails.
@@ -53,26 +55,93 @@ func (m *Mail) newEmail(subject, message string, receivers []string, files ...st
 		Headers: textproto.MIMEHeader{},
 	}
 
-	for _, file := range files {
-		attachment, err := AttachFromURL(msg, file)
+	// Создаем HTML сообщение с встроенными изображениями
+	htmlContent := message
+
+	// Если есть изображения, встраиваем их в HTML
+	for i, file := range files {
+		contentID := fmt.Sprintf("image%d", i+1)
+
+		// Добавляем встроенное изображение
+		attachment, err := AttachInlineImageFromURL(msg, file, contentID)
 		if err != nil {
-			fmt.Printf("couldn't attach file %s: %v\n", file, err)
+			fmt.Printf("couldn't attach inline image %s: %v\n", file, err)
 			continue
 		}
+
 		msg.Attachments = append(msg.Attachments, attachment)
+
+		// Если изображение не встроено в HTML, добавляем его в конец сообщения
+		if !strings.Contains(htmlContent, "cid:"+contentID) {
+			htmlContent += fmt.Sprintf("<br><img src=\"cid:%s\" alt=\"Image %d\">", contentID, i+1)
+		}
 	}
+
 	if m.usePlainText {
 		msg.Text = []byte(message)
 	} else {
-		msg.HTML = []byte(message)
+		msg.HTML = []byte(htmlContent)
 	}
+
 	return msg
 }
 
 func (m *Mail) Send(ctx context.Context, subject, message string, receivers []string, images ...string) error {
+	htmlMessage := message
 
-	msg := m.newEmail(subject, message, receivers, images...)
+	if !m.usePlainText && len(images) > 0 {
+		// Создаем массив для отслеживания использованных изображений
+		usedImages := make([]bool, len(images))
 
+		// Обрабатываем индивидуальные плейсхолдеры для изображений
+		for i := range images {
+			imagePlaceholder := fmt.Sprintf("{{IMAGE:%d}}", i)
+			if strings.Contains(htmlMessage, imagePlaceholder) {
+				imageTag := fmt.Sprintf("<img src=\"cid:image%d\" alt=\"Image %d\" style=\"width:300px;height:auto;margin:10px 20px;\">", i+1, i+1)
+				htmlMessage = strings.Replace(htmlMessage, imagePlaceholder, imageTag, -1)
+				usedImages[i] = true
+			}
+		}
+
+		// Обрабатываем общий плейсхолдер {{IMAGES}}
+		if strings.Contains(htmlMessage, "{{IMAGES}}") {
+			var remainingImagesHTML string
+			for i, used := range usedImages {
+				if !used {
+					remainingImagesHTML += fmt.Sprintf("<img src=\"cid:image%d\" alt=\"Image %d\" style=\"width:300px;height:auto;margin:10px 20px;\"><br>", i+1, i+1)
+				}
+			}
+			htmlMessage = strings.Replace(htmlMessage, "{{IMAGES}}", remainingImagesHTML, 1)
+		}
+	}
+
+	// Создаем email напрямую
+	msg := &email.Email{
+		To:      validEmails(receivers),
+		From:    m.senderAddress,
+		Subject: subject,
+		Headers: textproto.MIMEHeader{},
+	}
+
+	// Прикрепляем изображения
+	for i, imageURL := range images {
+		contentID := fmt.Sprintf("image%d", i+1)
+		attachment, err := AttachInlineImageFromURL(msg, imageURL, contentID)
+		if err != nil {
+			fmt.Printf("couldn't attach inline image %s: %v\n", imageURL, err)
+			continue
+		}
+		msg.Attachments = append(msg.Attachments, attachment)
+	}
+
+	// Устанавливаем содержимое сообщения
+	if m.usePlainText {
+		msg.Text = []byte(message)
+	} else {
+		msg.HTML = []byte(htmlMessage)
+	}
+
+	// Отправляем email
 	var err error
 	select {
 	case <-ctx.Done():
@@ -86,8 +155,8 @@ func (m *Mail) Send(ctx context.Context, subject, message string, receivers []st
 	return err
 }
 
-// TODO ограничить вес файла (валидация)
-func AttachFromURL(msg *email.Email, fileURL string) (*email.Attachment, error) {
+// AttachInlineImageFromURL загружает изображение по URL и добавляет его как встроенное изображение
+func AttachInlineImageFromURL(msg *email.Email, fileURL string, contentID string) (*email.Attachment, error) {
 	resp, err := http.Get(fileURL)
 	if err != nil {
 		return nil, fmt.Errorf("error downloading file: %v", err)
@@ -107,7 +176,30 @@ func AttachFromURL(msg *email.Email, fileURL string) (*email.Attachment, error) 
 		contentType = mime.TypeByExtension(filepath.Ext(name))
 	}
 
-	return msg.Attach(resp.Body, name, contentType)
+	// Проверяем, что это изображение
+	if !strings.HasPrefix(contentType, "image/") {
+		// Если это не изображение, прикрепляем как обычный файл
+		return msg.Attach(resp.Body, name, contentType)
+	}
+
+	// Читаем содержимое файла
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("error reading file: %v", err)
+	}
+
+	// Создаем встроенное изображение с Content-ID
+	attachment := &email.Attachment{
+		Filename:    name,
+		ContentType: contentType,
+		Header:      textproto.MIMEHeader{},
+		Content:     data,
+	}
+
+	attachment.Header.Set("Content-ID", "<"+contentID+">")
+	attachment.Header.Set("Content-Disposition", "inline")
+
+	return attachment, nil
 }
 
 func validEmails(to []string) []string {
