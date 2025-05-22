@@ -176,3 +176,32 @@ func (s *Service) GetAllNotifications(ctx context.Context, empty *emptypb.Empty)
 
 	return response, nil
 }
+
+// Получение настроек конкретного пользователя
+func (s *Service) GetUserSettings(ctx context.Context, request *gen_notifier.GetUserSettingsRequest) (*gen_notifier.GetAllSettingsResponse, error) {
+	v := validator.New()
+	v.Check(request.GetUserId() != "", "user_id", "must be provided")
+
+	if !v.Valid() {
+		return nil, errors.New("invalid user_id")
+	}
+
+	settings, err := s.notifySrv.GetUserSettings(request.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+
+	response := &gen_notifier.GetAllSettingsResponse{
+		Settings: make([]*gen_notifier.NotifierSettings, 0, len(settings)),
+	}
+
+	for _, setting := range settings {
+		response.Settings = append(response.Settings, &gen_notifier.NotifierSettings{
+			UserId:  setting.UserId,
+			Channel: setting.Channel,
+			Token:   setting.Token,
+		})
+	}
+
+	return response, nil
+}

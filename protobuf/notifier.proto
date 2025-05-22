@@ -59,6 +59,11 @@ message GetAllNotificationsResponse {
   repeated Notification notifications = 1;
 }
 
+// Запрос на получение настроек пользователя
+message GetUserSettingsRequest {
+  string user_id = 1;             // ID пользователя
+}
+
 // Сервис уведомлений
 service NotificationService {
   // Подписка на уведомления
@@ -78,4 +83,7 @@ service NotificationService {
 
   // Получение всех уведомлений
   rpc GetAllNotifications(google.protobuf.Empty) returns (GetAllNotificationsResponse);
+
+  // Получение настроек конкретного пользователя
+  rpc GetUserSettings(GetUserSettingsRequest) returns (GetAllSettingsResponse);
 }

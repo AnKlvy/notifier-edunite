@@ -81,3 +81,8 @@ func (n *NotifyService) GetAllSettings() ([]database.NotifierSettings, error) {
 func (n *NotifyService) GetAllNotifications() ([]database.Notification, error) {
 	return n.repo.Notifier.GetAllNotifications()
 }
+
+// Получение настроек конкретного пользователя
+func (n *NotifyService) GetUserSettings(userId string) ([]database.NotifierSettings, error) {
+	return n.repo.Notifier.GetUserSettings(userId)
+}

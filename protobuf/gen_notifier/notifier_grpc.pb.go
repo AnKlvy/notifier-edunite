@@ -26,6 +26,7 @@ const (
 	NotificationService_SendToAll_FullMethodName           = "/notify.NotificationService/SendToAll"
 	NotificationService_GetAllSettings_FullMethodName      = "/notify.NotificationService/GetAllSettings"
 	NotificationService_GetAllNotifications_FullMethodName = "/notify.NotificationService/GetAllNotifications"
+	NotificationService_GetUserSettings_FullMethodName     = "/notify.NotificationService/GetUserSettings"
 )
 
 // NotificationServiceClient is the client API for NotificationService service.
@@ -46,6 +47,8 @@ type NotificationServiceClient interface {
 	GetAllSettings(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAllSettingsResponse, error)
 	// Получение всех уведомлений
 	GetAllNotifications(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAllNotificationsResponse, error)
+	// Получение настроек конкретного пользователя
+	GetUserSettings(ctx context.Context, in *GetUserSettingsRequest, opts ...grpc.CallOption) (*GetAllSettingsResponse, error)
 }
 
 type notificationServiceClient struct {
@@ -116,6 +119,16 @@ func (c *notificationServiceClient) GetAllNotifications(ctx context.Context, in 
 	return out, nil
 }
 
+func (c *notificationServiceClient) GetUserSettings(ctx context.Context, in *GetUserSettingsRequest, opts ...grpc.CallOption) (*GetAllSettingsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAllSettingsResponse)
+	err := c.cc.Invoke(ctx, NotificationService_GetUserSettings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations must embed UnimplementedNotificationServiceServer
 // for forward compatibility.
@@ -134,6 +147,8 @@ type NotificationServiceServer interface {
 	GetAllSettings(context.Context, *emptypb.Empty) (*GetAllSettingsResponse, error)
 	// Получение всех уведомлений
 	GetAllNotifications(context.Context, *emptypb.Empty) (*GetAllNotificationsResponse, error)
+	// Получение настроек конкретного пользователя
+	GetUserSettings(context.Context, *GetUserSettingsRequest) (*GetAllSettingsResponse, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -161,6 +176,9 @@ func (UnimplementedNotificationServiceServer) GetAllSettings(context.Context, *e
 }
 func (UnimplementedNotificationServiceServer) GetAllNotifications(context.Context, *emptypb.Empty) (*GetAllNotificationsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAllNotifications not implemented")
+}
+func (UnimplementedNotificationServiceServer) GetUserSettings(context.Context, *GetUserSettingsRequest) (*GetAllSettingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUserSettings not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 func (UnimplementedNotificationServiceServer) testEmbeddedByValue()                             {}
@@ -291,6 +309,24 @@ func _NotificationService_GetAllNotifications_Handler(srv interface{}, ctx conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationService_GetUserSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetUserSettingsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).GetUserSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_GetUserSettings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).GetUserSettings(ctx, req.(*GetUserSettingsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -321,6 +357,10 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAllNotifications",
 			Handler:    _NotificationService_GetAllNotifications_Handler,
+		},
+		{
+			MethodName: "GetUserSettings",
+			Handler:    _NotificationService_GetUserSettings_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

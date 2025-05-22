@@ -21,6 +21,7 @@ type Models struct {
 		GetAllReceiversByChannel(channel string) ([]string, error)
 		GetAllSettings() ([]NotifierSettings, error)
 		GetAllNotifications() ([]Notification, error)
+		GetUserSettings(userId string) ([]NotifierSettings, error)
 	}
 }
 

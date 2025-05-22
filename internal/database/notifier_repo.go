@@ -267,3 +267,38 @@ func (n *NotifierModel) GetAllNotifications() ([]Notification, error) {
 
 	return notifications, nil
 }
+
+// Получение настроек конкретного пользователя
+func (n *NotifierModel) GetUserSettings(userId string) ([]NotifierSettings, error) {
+	query := `
+		SELECT * FROM notifier_settings 
+		WHERE user_id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := n.DB.QueryContext(ctx, query, userId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var settings []NotifierSettings
+	for rows.Next() {
+		var s NotifierSettings
+		if err := rows.Scan(&s.Id, &s.UserId, &s.Channel, &s.Token); err != nil {
+			return nil, err
+		}
+		settings = append(settings, s)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	if len(settings) == 0 {
+		return nil, ErrRecordNotFound
+	}
+
+	return settings, nil
+}
