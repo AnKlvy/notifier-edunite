@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -19,17 +20,19 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	NotificationService_Subscribe_FullMethodName       = "/notify.NotificationService/Subscribe"
-	NotificationService_Unsubscribe_FullMethodName     = "/notify.NotificationService/Unsubscribe"
-	NotificationService_SendToOneOrMany_FullMethodName = "/notify.NotificationService/SendToOneOrMany"
-	NotificationService_SendToAll_FullMethodName       = "/notify.NotificationService/SendToAll"
+	NotificationService_Subscribe_FullMethodName           = "/notify.NotificationService/Subscribe"
+	NotificationService_Unsubscribe_FullMethodName         = "/notify.NotificationService/Unsubscribe"
+	NotificationService_SendToOneOrMany_FullMethodName     = "/notify.NotificationService/SendToOneOrMany"
+	NotificationService_SendToAll_FullMethodName           = "/notify.NotificationService/SendToAll"
+	NotificationService_GetAllSettings_FullMethodName      = "/notify.NotificationService/GetAllSettings"
+	NotificationService_GetAllNotifications_FullMethodName = "/notify.NotificationService/GetAllNotifications"
 )
 
 // NotificationServiceClient is the client API for NotificationService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// Сертификат для подключения
+// Сервис уведомлений
 type NotificationServiceClient interface {
 	// Подписка на уведомления
 	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
@@ -37,7 +40,12 @@ type NotificationServiceClient interface {
 	Unsubscribe(ctx context.Context, in *UnsubscribeRequest, opts ...grpc.CallOption) (*SuccessResponse, error)
 	// Отправка уведомления
 	SendToOneOrMany(ctx context.Context, in *UsersNotification, opts ...grpc.CallOption) (*UsersNotification, error)
+	// Отправка всем
 	SendToAll(ctx context.Context, in *Notification, opts ...grpc.CallOption) (*Notification, error)
+	// Получение всех настроек уведомлений
+	GetAllSettings(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAllSettingsResponse, error)
+	// Получение всех уведомлений
+	GetAllNotifications(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAllNotificationsResponse, error)
 }
 
 type notificationServiceClient struct {
@@ -88,11 +96,31 @@ func (c *notificationServiceClient) SendToAll(ctx context.Context, in *Notificat
 	return out, nil
 }
 
+func (c *notificationServiceClient) GetAllSettings(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAllSettingsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAllSettingsResponse)
+	err := c.cc.Invoke(ctx, NotificationService_GetAllSettings_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *notificationServiceClient) GetAllNotifications(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetAllNotificationsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAllNotificationsResponse)
+	err := c.cc.Invoke(ctx, NotificationService_GetAllNotifications_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations must embed UnimplementedNotificationServiceServer
 // for forward compatibility.
 //
-// Сертификат для подключения
+// Сервис уведомлений
 type NotificationServiceServer interface {
 	// Подписка на уведомления
 	Subscribe(context.Context, *SubscribeRequest) (*SuccessResponse, error)
@@ -100,7 +128,12 @@ type NotificationServiceServer interface {
 	Unsubscribe(context.Context, *UnsubscribeRequest) (*SuccessResponse, error)
 	// Отправка уведомления
 	SendToOneOrMany(context.Context, *UsersNotification) (*UsersNotification, error)
+	// Отправка всем
 	SendToAll(context.Context, *Notification) (*Notification, error)
+	// Получение всех настроек уведомлений
+	GetAllSettings(context.Context, *emptypb.Empty) (*GetAllSettingsResponse, error)
+	// Получение всех уведомлений
+	GetAllNotifications(context.Context, *emptypb.Empty) (*GetAllNotificationsResponse, error)
 	mustEmbedUnimplementedNotificationServiceServer()
 }
 
@@ -122,6 +155,12 @@ func (UnimplementedNotificationServiceServer) SendToOneOrMany(context.Context, *
 }
 func (UnimplementedNotificationServiceServer) SendToAll(context.Context, *Notification) (*Notification, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendToAll not implemented")
+}
+func (UnimplementedNotificationServiceServer) GetAllSettings(context.Context, *emptypb.Empty) (*GetAllSettingsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllSettings not implemented")
+}
+func (UnimplementedNotificationServiceServer) GetAllNotifications(context.Context, *emptypb.Empty) (*GetAllNotificationsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAllNotifications not implemented")
 }
 func (UnimplementedNotificationServiceServer) mustEmbedUnimplementedNotificationServiceServer() {}
 func (UnimplementedNotificationServiceServer) testEmbeddedByValue()                             {}
@@ -216,6 +255,42 @@ func _NotificationService_SendToAll_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationService_GetAllSettings_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).GetAllSettings(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_GetAllSettings_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).GetAllSettings(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _NotificationService_GetAllNotifications_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(NotificationServiceServer).GetAllNotifications(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: NotificationService_GetAllNotifications_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(NotificationServiceServer).GetAllNotifications(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -238,6 +313,14 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SendToAll",
 			Handler:    _NotificationService_SendToAll_Handler,
+		},
+		{
+			MethodName: "GetAllSettings",
+			Handler:    _NotificationService_GetAllSettings_Handler,
+		},
+		{
+			MethodName: "GetAllNotifications",
+			Handler:    _NotificationService_GetAllNotifications_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -19,6 +19,8 @@ type Models struct {
 		SendNotification(userId []string, notification *Notification) error
 		GetReceiversByUsersAndChannel(userId []string, channel string) ([]string, error)
 		GetAllReceiversByChannel(channel string) ([]string, error)
+		GetAllSettings() ([]NotifierSettings, error)
+		GetAllNotifications() ([]Notification, error)
 	}
 }
 

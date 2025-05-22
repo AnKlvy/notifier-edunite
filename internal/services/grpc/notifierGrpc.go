@@ -8,6 +8,8 @@ import (
 	"github.com/AnKlvy/notifier-edunite/internal/validator"
 	"github.com/AnKlvy/notifier-edunite/protobuf/gen_notifier"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/types/known/emptypb"
+	"time"
 )
 
 type Service struct {
@@ -23,18 +25,30 @@ func (s *Service) Subscribe(ctx context.Context, request *gen_notifier.Subscribe
 	v := validator.New()
 	v.Check(request.GetValue() != "", "token", "must be provided")
 	v.Check(len(request.GetValue()) <= 500, "token", "must be no more than 500 characters")
-	database.ValidateSettings(v, request.GetUserId(), request.GetChannel())
+	database.ValidateSubscribe(v, request.GetUserId(), request.GetChannel(), request.GetValue())
 
 	if !v.Valid() {
+		// Преобразуем карту ошибок в строку
+		errorMessages := ""
+		for field, message := range v.Errors {
+			if errorMessages != "" {
+				errorMessages += "; "
+			}
+			errorMessages += field + ": " + message
+		}
+
 		return &gen_notifier.SuccessResponse{
 			Success:      false,
-			ErrorMessage: "invalid input data",
-		}, errors.New("invalid input data")
+			ErrorMessage: errorMessages,
+		}, errors.New(errorMessages)
 	}
 
 	err := s.notifySrv.Subscribe(request.GetUserId(), request.GetChannel(), request.GetValue())
 	if err != nil {
-		return nil, err
+		return &gen_notifier.SuccessResponse{
+			Success:      false,
+			ErrorMessage: err.Error(),
+		}, err
 	}
 
 	return &gen_notifier.SuccessResponse{Success: true, ErrorMessage: ""}, nil
@@ -71,7 +85,6 @@ func (s *Service) SendToOneOrMany(ctx context.Context, notification *gen_notifie
 	}
 
 	v := validator.New()
-
 	database.ValidateNotification(v, notifi)
 
 	if !v.Valid() {
@@ -109,4 +122,57 @@ func (s *Service) SendToAll(ctx context.Context, notification *gen_notifier.Noti
 	}
 
 	return notification, nil
+}
+
+// Получение всех настроек уведомлений
+func (s *Service) GetAllSettings(ctx context.Context, empty *emptypb.Empty) (*gen_notifier.GetAllSettingsResponse, error) {
+	settings, err := s.notifySrv.GetAllSettings()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &gen_notifier.GetAllSettingsResponse{
+		Settings: make([]*gen_notifier.NotifierSettings, 0, len(settings)),
+	}
+
+	for _, setting := range settings {
+		response.Settings = append(response.Settings, &gen_notifier.NotifierSettings{
+			UserId:  setting.UserId,
+			Channel: setting.Channel,
+			Token:   setting.Token,
+		})
+	}
+
+	return response, nil
+}
+
+// Получение всех уведомлений
+func (s *Service) GetAllNotifications(ctx context.Context, empty *emptypb.Empty) (*gen_notifier.GetAllNotificationsResponse, error) {
+	notifications, err := s.notifySrv.GetAllNotifications()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &gen_notifier.GetAllNotificationsResponse{
+		Notifications: make([]*gen_notifier.Notification, 0, len(notifications)),
+	}
+
+	for _, notification := range notifications {
+		var images []string
+		if notification.Images != nil {
+			images = *notification.Images
+		}
+
+		response.Notifications = append(response.Notifications, &gen_notifier.Notification{
+			Id:        int64(notification.Id), // Добавляем ID из базы данных
+			Message:   notification.Message,
+			Subject:   notification.Subject,
+			Images:    images,
+			Metadata:  notification.Metadata,
+			CreatedAt: notification.CreatedAt.Format(time.RFC3339),
+			UpdatedAt: notification.UpdatedAt.Format(time.RFC3339),
+		})
+	}
+
+	return response, nil
 }

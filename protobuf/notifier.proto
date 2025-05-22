@@ -2,15 +2,19 @@ syntax = "proto3";
 
 package notify;
 
+import "google/protobuf/empty.proto";
+
 option go_package = "github.com/AnKlvy/notify-service/protobuf/gen_notifier";
 
 // Сообщение для отправки уведомлений
 message Notification {
   string message = 1;
   string subject = 2;
-  repeated string images=3;
+  repeated string images = 3;
   map<string, string> metadata = 4;
-
+  string created_at = 5;  // ISO 8601 формат даты/времени
+  string updated_at = 6;  // ISO 8601 формат даты/времени
+  int64 id = 7;           // ID уведомления
 }
 
 message UsersNotification {
@@ -38,7 +42,24 @@ message SuccessResponse {
   string error_message = 2;       // Сообщение об ошибке (если есть)
 }
 
-// Сертификат для подключения
+// Настройки уведомлений пользователя
+message NotifierSettings {
+  string user_id = 1;             // ID пользователя
+  string channel = 2;             // Канал
+  string token = 3;               // Токен или email
+}
+
+// Ответ со всеми настройками
+message GetAllSettingsResponse {
+  repeated NotifierSettings settings = 1;
+}
+
+// Ответ со всеми уведомлениями
+message GetAllNotificationsResponse {
+  repeated Notification notifications = 1;
+}
+
+// Сервис уведомлений
 service NotificationService {
   // Подписка на уведомления
   rpc Subscribe(SubscribeRequest) returns (SuccessResponse);
@@ -49,6 +70,12 @@ service NotificationService {
   // Отправка уведомления
   rpc SendToOneOrMany(UsersNotification) returns (UsersNotification);
 
+  // Отправка всем
   rpc SendToAll(Notification) returns (Notification);
 
+  // Получение всех настроек уведомлений
+  rpc GetAllSettings(google.protobuf.Empty) returns (GetAllSettingsResponse);
+
+  // Получение всех уведомлений
+  rpc GetAllNotifications(google.protobuf.Empty) returns (GetAllNotificationsResponse);
 }

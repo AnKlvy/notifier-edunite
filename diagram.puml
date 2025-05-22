@@ -1,0 +1,134 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+namespace config {
+    class Config << (S,Aquamarine) >> {
+        .. Limiter ..
+        - Float64 : float64
+        - Int     : int
+        - Bool    : bool
+
+        .. Main ..
+        + Port : int
+        + Env  : string
+
+        .. Db ..
+        - Host     : string
+        - Port     : int
+        - Timeout  : int
+        - Database : string
+    }
+}
+
+namespace database {
+    class Models << (S,Aquamarine) >> {
+        .. Notifier interface ..
+        + Subscribe(channel, userId, token) : error
+        + Unsubscribe(channel, userId) : error
+        + SendNotification(receivers, notification) : error
+        + GetReceiversByUsersAndChannel(userIds, channel) : ([]string, error)
+        + GetAllReceiversByChannel(channel) : ([]string, error)
+    }
+
+    class Notification << (S,Aquamarine) >> {
+        + Message : string
+        + Subject : string
+        + Images : *[]string
+        + Metadata : map[string]string
+    }
+
+    class NotifierModel << (S,Aquamarine) >> {
+        + DB : *sql.DB
+
+        -- internal --
+        - getTokensByRows(rows *sql.Rows) : ([]string, error)
+
+        -- exported --
+        + Subscribe(userId, channel, token) : error
+        + Unsubscribe(userId, channel) : error
+        + SendNotification(userIds, notification) : error
+        + GetReceiversByUsersAndChannel(userIds, channel) : ([]string, error)
+        + GetAllReceiversByChannel(channel) : ([]string, error)
+    }
+
+    class NotifierSettings << (S,Aquamarine) >> {
+        + UserId : string
+        + Channel : string
+        + Token : string
+    }
+}
+
+namespace email {
+    class Mail << (S,Aquamarine) >> {
+        .. private ..
+        - usePlainText : bool
+        - senderAddress : string
+        - smtpHostAddr : string
+        - smtpAuth : smtp.Auth
+        - receiverAddresses : []string
+        - newEmail(subject, message, receivers, files...) : *email.Email
+
+        .. public ..
+        + Send(ctx, subject, message, receivers, images...) : error
+    }
+}
+
+"notifier.NotifyInterface" <|-- "email.Mail"
+
+namespace firebase {
+    class Firebase << (S,Aquamarine) >> {
+        - client : *messaging.Client
+        + Send(ctx, title, body, tokens, images...) : error
+    }
+}
+
+"notifier.NotifyInterface" <|-- "firebase.Firebase"
+
+namespace grpc {
+    class Service << (S,Aquamarine) >> {
+        - notifySrv : notifier.NotifyService
+        + Subscribe(ctx, *SubscribeRequest) : (*SuccessResponse, error)
+        + Unsubscribe(ctx, *UnsubscribeRequest) : (*SuccessResponse, error)
+        + SendToOneOrMany(ctx, *UsersNotification) : (*UsersNotification, error)
+        + SendToAll(ctx, *Notification) : (*Notification, error)
+    }
+}
+"gen_notifier.UnimplementedNotificationServiceServer" *-- "grpc.Service"
+
+namespace main {
+    class GRPCServer << (S,Aquamarine) >> {
+        - addr : string
+        - notifier : notifier.NotifyService
+        - server : *grpc.Server
+
+        + Run() : error
+    }
+}
+
+namespace notifier {
+    interface NotifyInterface {
+        + Send(ctx, subject, message, receivers, images...) : error
+    }
+
+    class NotifyService << (S,Aquamarine) >> {
+        - repo : database.Models
+        - services : map[string]NotifyInterface
+
+        - send(ctx, service, tokens, err, notification) : error
+
+        + Subscribe(userId, channel, token) : error
+        + Unsubscribe(userId, channel) : error
+        + SendToOneOrManyByChannel(ctx, userIds, notification) : error
+        + SendToAll(ctx, notification) : error
+    }
+}
+
+namespace validator {
+    class Validator << (S,Aquamarine) >> {
+        + Errors : map[string]string
+        + Valid() : bool
+        + AddError(key, message)
+        + Check(ok, key, message)
+    }
+}
+@enduml

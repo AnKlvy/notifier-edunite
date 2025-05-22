@@ -71,3 +71,13 @@ func (n *NotifyService) send(ctx context.Context, service NotifyInterface, token
 	}
 	return nil
 }
+
+// Получение всех настроек уведомлений
+func (n *NotifyService) GetAllSettings() ([]database.NotifierSettings, error) {
+	return n.repo.Notifier.GetAllSettings()
+}
+
+// Получение всех уведомлений
+func (n *NotifyService) GetAllNotifications() ([]database.Notification, error) {
+	return n.repo.Notifier.GetAllNotifications()
+}
