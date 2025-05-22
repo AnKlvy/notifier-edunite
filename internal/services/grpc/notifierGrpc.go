@@ -96,6 +96,13 @@ func (s *Service) SendToOneOrMany(ctx context.Context, notification *gen_notifie
 		return nil, err
 	}
 
+	// Обновляем поля в ответе
+	if notification.Notification != nil {
+		notification.Notification.Id = int64(notifi.Id)
+		notification.Notification.CreatedAt = notifi.CreatedAt.Format(time.RFC3339)
+		notification.Notification.UpdatedAt = notifi.UpdatedAt.Format(time.RFC3339)
+	}
+
 	return notification, nil
 }
 
@@ -120,6 +127,11 @@ func (s *Service) SendToAll(ctx context.Context, notification *gen_notifier.Noti
 	if err != nil {
 		return nil, err
 	}
+
+	// Обновляем поля в ответе
+	notification.Id = int64(notifi.Id)
+	notification.CreatedAt = notifi.CreatedAt.Format(time.RFC3339)
+	notification.UpdatedAt = notifi.UpdatedAt.Format(time.RFC3339)
 
 	return notification, nil
 }
@@ -200,6 +212,58 @@ func (s *Service) GetUserSettings(ctx context.Context, request *gen_notifier.Get
 			UserId:  setting.UserId,
 			Channel: setting.Channel,
 			Token:   setting.Token,
+		})
+	}
+
+	return response, nil
+}
+
+// Получение уведомлений конкретного пользователя
+func (s *Service) GetUserNotifications(ctx context.Context, request *gen_notifier.GetUserNotificationsRequest) (*gen_notifier.GetAllNotificationsResponse, error) {
+	v := validator.New()
+	v.Check(request.GetUserId() != "", "user_id", "must be provided")
+	v.Check(len(request.GetUserId()) <= 100, "user_id", "must be no more than 100 characters")
+
+	if !v.Valid() {
+		return nil, errors.New("invalid user_id")
+	}
+
+	// Парсим дату из строки
+	var fromDate time.Time
+	var err error
+	if request.GetFromDate() != "" {
+		fromDate, err = time.Parse(time.RFC3339, request.GetFromDate())
+		if err != nil {
+			return nil, errors.New("invalid date format, use ISO 8601 (RFC3339)")
+		}
+	} else {
+		// Если дата не указана, используем дату "начала времен"
+		fromDate = time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC)
+	}
+
+	notifications, err := s.notifySrv.GetUserNotifications(request.GetUserId(), fromDate)
+	if err != nil {
+		return nil, err
+	}
+
+	response := &gen_notifier.GetAllNotificationsResponse{
+		Notifications: make([]*gen_notifier.Notification, 0, len(notifications)),
+	}
+
+	for _, notification := range notifications {
+		var images []string
+		if notification.Images != nil {
+			images = *notification.Images
+		}
+
+		response.Notifications = append(response.Notifications, &gen_notifier.Notification{
+			Id:        int64(notification.Id),
+			Message:   notification.Message,
+			Subject:   notification.Subject,
+			Images:    images,
+			Metadata:  notification.Metadata,
+			CreatedAt: notification.CreatedAt.Format(time.RFC3339),
+			UpdatedAt: notification.UpdatedAt.Format(time.RFC3339),
 		})
 	}
 

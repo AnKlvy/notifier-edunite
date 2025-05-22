@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"errors"
+	"time"
 )
 
 var (
@@ -22,6 +23,7 @@ type Models struct {
 		GetAllSettings() ([]NotifierSettings, error)
 		GetAllNotifications() ([]Notification, error)
 		GetUserSettings(userId string) ([]NotifierSettings, error)
+		GetUserNotifications(userId string, fromDate time.Time) ([]Notification, error)
 	}
 }
 

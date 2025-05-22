@@ -113,7 +113,12 @@ func (n *NotifierModel) SendNotification(userIds []string, notification *Notific
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func(tx *sql.Tx) {
+		err := tx.Rollback()
+		if err != nil {
+			fmt.Println("error rolling back transaction:", err)
+		}
+	}(tx)
 
 	var notificationId int
 	now := time.Now()
@@ -125,7 +130,8 @@ func (n *NotifierModel) SendNotification(userIds []string, notification *Notific
 		return err
 	}
 
-	// Обновляем время в структуре
+	// Обновляем ID и время в структуре
+	notification.Id = notificationId
 	notification.CreatedAt = now
 	notification.UpdatedAt = now
 
@@ -152,7 +158,12 @@ func (n *NotifierModel) GetReceiversByUsersAndChannel(userIds []string, channel 
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			fmt.Println("error closing rows:", err)
+		}
+	}(rows)
 
 	return n.getTokensByRows(rows)
 }
@@ -169,7 +180,12 @@ func (n *NotifierModel) GetAllReceiversByChannel(channel string) ([]string, erro
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			fmt.Println("error closing rows:", err)
+		}
+	}(rows)
 
 	return n.getTokensByRows(rows)
 }
@@ -206,7 +222,12 @@ func (n *NotifierModel) GetAllSettings() ([]NotifierSettings, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			fmt.Println("error closing rows:", err)
+		}
+	}(rows)
 
 	var settings []NotifierSettings
 	for rows.Next() {
@@ -238,7 +259,12 @@ func (n *NotifierModel) GetAllNotifications() ([]Notification, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			fmt.Println("error closing rows:", err)
+		}
+	}(rows)
 
 	var notifications []Notification
 	for rows.Next() {
@@ -281,7 +307,12 @@ func (n *NotifierModel) GetUserSettings(userId string) ([]NotifierSettings, erro
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			fmt.Println("error closing rows:", err)
+		}
+	}(rows)
 
 	var settings []NotifierSettings
 	for rows.Next() {
@@ -301,4 +332,56 @@ func (n *NotifierModel) GetUserSettings(userId string) ([]NotifierSettings, erro
 	}
 
 	return settings, nil
+}
+
+// Получение уведомлений по пользователю с учетом даты
+func (n *NotifierModel) GetUserNotifications(userId string, fromDate time.Time) ([]Notification, error) {
+	query := `
+		SELECT n.* 
+		FROM notifications n
+		JOIN notifications_users nu ON n.id = nu.notification_id
+		WHERE (nu.user_id = $1 OR nu.user_id = 'all')
+		AND n.created_at >= $2
+		ORDER BY n.created_at DESC`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := n.DB.QueryContext(ctx, query, userId, fromDate)
+	if err != nil {
+		return nil, err
+	}
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			fmt.Println("error closing rows:", err)
+		}
+	}(rows)
+
+	var notifications []Notification
+	for rows.Next() {
+		var n Notification
+		var metadataJSON []byte
+		var images []string
+
+		if err := rows.Scan(&n.Id, &n.Message, &n.Subject, &metadataJSON, pq.Array(&images), &n.CreatedAt, &n.UpdatedAt); err != nil {
+			return nil, err
+		}
+
+		// Преобразуем JSON в map
+		if len(metadataJSON) > 0 {
+			if err := json.Unmarshal(metadataJSON, &n.Metadata); err != nil {
+				return nil, err
+			}
+		}
+
+		n.Images = &images
+		notifications = append(notifications, n)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return notifications, nil
 }

@@ -64,6 +64,12 @@ message GetUserSettingsRequest {
   string user_id = 1;             // ID пользователя
 }
 
+// Запрос на получение уведомлений пользователя
+message GetUserNotificationsRequest {
+  string user_id = 1;             // ID пользователя
+  string from_date = 2;           // Дата начала в формате ISO 8601
+}
+
 // Сервис уведомлений
 service NotificationService {
   // Подписка на уведомления
@@ -86,4 +92,7 @@ service NotificationService {
 
   // Получение настроек конкретного пользователя
   rpc GetUserSettings(GetUserSettingsRequest) returns (GetAllSettingsResponse);
+
+  // Получение уведомлений конкретного пользователя
+  rpc GetUserNotifications(GetUserNotificationsRequest) returns (GetAllNotificationsResponse);
 }

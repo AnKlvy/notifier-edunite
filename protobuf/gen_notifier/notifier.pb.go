@@ -538,6 +538,59 @@ func (x *GetUserSettingsRequest) GetUserId() string {
 	return ""
 }
 
+// Запрос на получение уведомлений пользователя
+type GetUserNotificationsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        string                 `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`       // ID пользователя
+	FromDate      string                 `protobuf:"bytes,2,opt,name=from_date,json=fromDate,proto3" json:"from_date,omitempty"` // Дата начала в формате ISO 8601
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetUserNotificationsRequest) Reset() {
+	*x = GetUserNotificationsRequest{}
+	mi := &file_notifier_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetUserNotificationsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetUserNotificationsRequest) ProtoMessage() {}
+
+func (x *GetUserNotificationsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_notifier_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetUserNotificationsRequest.ProtoReflect.Descriptor instead.
+func (*GetUserNotificationsRequest) Descriptor() ([]byte, []int) {
+	return file_notifier_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *GetUserNotificationsRequest) GetUserId() string {
+	if x != nil {
+		return x.UserId
+	}
+	return ""
+}
+
+func (x *GetUserNotificationsRequest) GetFromDate() string {
+	if x != nil {
+		return x.FromDate
+	}
+	return ""
+}
+
 var File_notifier_proto protoreflect.FileDescriptor
 
 const file_notifier_proto_rawDesc = "" +
@@ -582,7 +635,10 @@ const file_notifier_proto_rawDesc = "" +
 	"\x1bGetAllNotificationsResponse\x12:\n" +
 	"\rnotifications\x18\x01 \x03(\v2\x14.notify.NotificationR\rnotifications\"1\n" +
 	"\x16GetUserSettingsRequest\x12\x17\n" +
-	"\auser_id\x18\x01 \x01(\tR\x06userId2\x8c\x04\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\"S\n" +
+	"\x1bGetUserNotificationsRequest\x12\x17\n" +
+	"\auser_id\x18\x01 \x01(\tR\x06userId\x12\x1b\n" +
+	"\tfrom_date\x18\x02 \x01(\tR\bfromDate2\xee\x04\n" +
 	"\x13NotificationService\x12>\n" +
 	"\tSubscribe\x12\x18.notify.SubscribeRequest\x1a\x17.notify.SuccessResponse\x12B\n" +
 	"\vUnsubscribe\x12\x1a.notify.UnsubscribeRequest\x1a\x17.notify.SuccessResponse\x12G\n" +
@@ -590,7 +646,8 @@ const file_notifier_proto_rawDesc = "" +
 	"\tSendToAll\x12\x14.notify.Notification\x1a\x14.notify.Notification\x12H\n" +
 	"\x0eGetAllSettings\x12\x16.google.protobuf.Empty\x1a\x1e.notify.GetAllSettingsResponse\x12R\n" +
 	"\x13GetAllNotifications\x12\x16.google.protobuf.Empty\x1a#.notify.GetAllNotificationsResponse\x12Q\n" +
-	"\x0fGetUserSettings\x12\x1e.notify.GetUserSettingsRequest\x1a\x1e.notify.GetAllSettingsResponseB8Z6github.com/AnKlvy/notify-service/protobuf/gen_notifierb\x06proto3"
+	"\x0fGetUserSettings\x12\x1e.notify.GetUserSettingsRequest\x1a\x1e.notify.GetAllSettingsResponse\x12`\n" +
+	"\x14GetUserNotifications\x12#.notify.GetUserNotificationsRequest\x1a#.notify.GetAllNotificationsResponseB8Z6github.com/AnKlvy/notify-service/protobuf/gen_notifierb\x06proto3"
 
 var (
 	file_notifier_proto_rawDescOnce sync.Once
@@ -604,7 +661,7 @@ func file_notifier_proto_rawDescGZIP() []byte {
 	return file_notifier_proto_rawDescData
 }
 
-var file_notifier_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_notifier_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
 var file_notifier_proto_goTypes = []any{
 	(*Notification)(nil),                // 0: notify.Notification
 	(*UsersNotification)(nil),           // 1: notify.UsersNotification
@@ -615,32 +672,35 @@ var file_notifier_proto_goTypes = []any{
 	(*GetAllSettingsResponse)(nil),      // 6: notify.GetAllSettingsResponse
 	(*GetAllNotificationsResponse)(nil), // 7: notify.GetAllNotificationsResponse
 	(*GetUserSettingsRequest)(nil),      // 8: notify.GetUserSettingsRequest
-	nil,                                 // 9: notify.Notification.MetadataEntry
-	nil,                                 // 10: notify.SubscribeRequest.MetadataEntry
-	(*emptypb.Empty)(nil),               // 11: google.protobuf.Empty
+	(*GetUserNotificationsRequest)(nil), // 9: notify.GetUserNotificationsRequest
+	nil,                                 // 10: notify.Notification.MetadataEntry
+	nil,                                 // 11: notify.SubscribeRequest.MetadataEntry
+	(*emptypb.Empty)(nil),               // 12: google.protobuf.Empty
 }
 var file_notifier_proto_depIdxs = []int32{
-	9,  // 0: notify.Notification.metadata:type_name -> notify.Notification.MetadataEntry
+	10, // 0: notify.Notification.metadata:type_name -> notify.Notification.MetadataEntry
 	0,  // 1: notify.UsersNotification.notification:type_name -> notify.Notification
-	10, // 2: notify.SubscribeRequest.metadata:type_name -> notify.SubscribeRequest.MetadataEntry
+	11, // 2: notify.SubscribeRequest.metadata:type_name -> notify.SubscribeRequest.MetadataEntry
 	5,  // 3: notify.GetAllSettingsResponse.settings:type_name -> notify.NotifierSettings
 	0,  // 4: notify.GetAllNotificationsResponse.notifications:type_name -> notify.Notification
 	2,  // 5: notify.NotificationService.Subscribe:input_type -> notify.SubscribeRequest
 	3,  // 6: notify.NotificationService.Unsubscribe:input_type -> notify.UnsubscribeRequest
 	1,  // 7: notify.NotificationService.SendToOneOrMany:input_type -> notify.UsersNotification
 	0,  // 8: notify.NotificationService.SendToAll:input_type -> notify.Notification
-	11, // 9: notify.NotificationService.GetAllSettings:input_type -> google.protobuf.Empty
-	11, // 10: notify.NotificationService.GetAllNotifications:input_type -> google.protobuf.Empty
+	12, // 9: notify.NotificationService.GetAllSettings:input_type -> google.protobuf.Empty
+	12, // 10: notify.NotificationService.GetAllNotifications:input_type -> google.protobuf.Empty
 	8,  // 11: notify.NotificationService.GetUserSettings:input_type -> notify.GetUserSettingsRequest
-	4,  // 12: notify.NotificationService.Subscribe:output_type -> notify.SuccessResponse
-	4,  // 13: notify.NotificationService.Unsubscribe:output_type -> notify.SuccessResponse
-	1,  // 14: notify.NotificationService.SendToOneOrMany:output_type -> notify.UsersNotification
-	0,  // 15: notify.NotificationService.SendToAll:output_type -> notify.Notification
-	6,  // 16: notify.NotificationService.GetAllSettings:output_type -> notify.GetAllSettingsResponse
-	7,  // 17: notify.NotificationService.GetAllNotifications:output_type -> notify.GetAllNotificationsResponse
-	6,  // 18: notify.NotificationService.GetUserSettings:output_type -> notify.GetAllSettingsResponse
-	12, // [12:19] is the sub-list for method output_type
-	5,  // [5:12] is the sub-list for method input_type
+	9,  // 12: notify.NotificationService.GetUserNotifications:input_type -> notify.GetUserNotificationsRequest
+	4,  // 13: notify.NotificationService.Subscribe:output_type -> notify.SuccessResponse
+	4,  // 14: notify.NotificationService.Unsubscribe:output_type -> notify.SuccessResponse
+	1,  // 15: notify.NotificationService.SendToOneOrMany:output_type -> notify.UsersNotification
+	0,  // 16: notify.NotificationService.SendToAll:output_type -> notify.Notification
+	6,  // 17: notify.NotificationService.GetAllSettings:output_type -> notify.GetAllSettingsResponse
+	7,  // 18: notify.NotificationService.GetAllNotifications:output_type -> notify.GetAllNotificationsResponse
+	6,  // 19: notify.NotificationService.GetUserSettings:output_type -> notify.GetAllSettingsResponse
+	7,  // 20: notify.NotificationService.GetUserNotifications:output_type -> notify.GetAllNotificationsResponse
+	13, // [13:21] is the sub-list for method output_type
+	5,  // [5:13] is the sub-list for method input_type
 	5,  // [5:5] is the sub-list for extension type_name
 	5,  // [5:5] is the sub-list for extension extendee
 	0,  // [0:5] is the sub-list for field type_name
@@ -657,7 +717,7 @@ func file_notifier_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_notifier_proto_rawDesc), len(file_notifier_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   12,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

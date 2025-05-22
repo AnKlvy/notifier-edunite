@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/AnKlvy/notifier-edunite/internal/database"
 	"log"
+	"time"
 )
 
 type NotifyInterface interface {
@@ -85,4 +86,9 @@ func (n *NotifyService) GetAllNotifications() ([]database.Notification, error) {
 // Получение настроек конкретного пользователя
 func (n *NotifyService) GetUserSettings(userId string) ([]database.NotifierSettings, error) {
 	return n.repo.Notifier.GetUserSettings(userId)
+}
+
+// Получение уведомлений по пользователю с учетом даты
+func (n *NotifyService) GetUserNotifications(userId string, fromDate time.Time) ([]database.Notification, error) {
+	return n.repo.Notifier.GetUserNotifications(userId, fromDate)
 }

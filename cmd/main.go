@@ -21,7 +21,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
+	defer func(db *sql.DB) {
+		err := db.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(db)
 	ntf, err := initNotify(db)
 	if err != nil {
 		log.Fatal(err)
@@ -40,7 +45,7 @@ func main() {
 	// Запускаем gRPC-сервер в отдельной горутине
 	go func() {
 		if serveErr := grpcServer.Run(); serveErr != nil {
-			log.Fatal(err, nil)
+			log.Fatal(serveErr)
 		}
 	}()
 
